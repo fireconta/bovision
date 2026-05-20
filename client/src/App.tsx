@@ -23,6 +23,7 @@ import Alerts from "./pages/Alerts";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import PlansPayment from "./pages/PlansPayment";
+import AppHome from "./pages/AppHome";
 import { useAuth } from "./_core/hooks/useAuth";
 import NotificationContainer from "./components/NotificationContainer";
 
@@ -49,6 +50,7 @@ function Router() {
       <Route path={"app/reports"} component={Reports} />
       <Route path={"app/settings"} component={Settings} />
       <Route path={"app/planos"} component={PlansPayment} />
+      <Route path={"app"} component={AppHome} />
       <Route path={"admin"} component={AdminPanel} />
       <Route path={"/admin-login"} component={() => <div>Admin Login</div>} />
       <Route path={"/planos"} component={() => <Landing />} />

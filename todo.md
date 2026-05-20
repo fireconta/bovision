@@ -188,3 +188,12 @@
 ## Deployment
 - [x] Checkpoint final
 - [ ] Publicação no Manus
+
+
+## Redesenho de UI (Novo)
+- [ ] Gerar imagens de fundo com tema Agro
+- [ ] Redesenhar página /aplicativo (PIN Login) com design mobile profissional
+- [ ] Redesenhar dashboard /app com layout profissional
+- [ ] Adicionar componentes de menu e cards interativos
+- [ ] Otimizar animações e responsividade mobile
+- [ ] Testar fluxos de navegação

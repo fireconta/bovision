@@ -1,261 +1,240 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Copy, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
+import { Lock, Smartphone, ChevronRight, Check } from 'lucide-react';
 
 const PinLogin = () => {
   const [pin, setPin] = useState('');
-  const [deviceId] = useState('BV-7X9K2M4L');
-  const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  const handleNumpad = (num: string) => {
-    if (pin.length < 6) setPin(pin + num);
+  const handleNumberClick = (num: string) => {
+    if (pin.length < 6) {
+      setPin(pin + num);
+      setError('');
+    }
   };
 
   const handleBackspace = () => {
     setPin(pin.slice(0, -1));
   };
 
-  const handleLogin = () => {
-    if (pin.length === 6) {
-      setIsLoading(true);
-      setTimeout(() => {
-        window.location.href = '/app';
-      }, 1500);
+  const handleSubmit = async () => {
+    if (pin.length !== 6) {
+      setError('PIN deve ter 6 dígitos');
+      return;
+    }
+
+    setIsLoading(true);
+    // Simular validação
+    setTimeout(() => {
+      if (pin === '123456') {
+        setSuccess(true);
+        setTimeout(() => {
+          window.location.href = '/app';
+        }, 1500);
+      } else {
+        setError('PIN inválido');
+        setIsLoading(false);
+      }
+    }, 800);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key >= '0' && e.key <= '9') {
+      handleNumberClick(e.key);
+    } else if (e.key === 'Backspace') {
+      handleBackspace();
+    } else if (e.key === 'Enter') {
+      handleSubmit();
     }
   };
 
-  const copyDeviceId = () => {
-    navigator.clipboard.writeText(deviceId);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown as EventListener);
+    return () => window.removeEventListener('keydown', handleKeyDown as EventListener);
+  }, [pin]);
+
+  const bgImage = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663677906549/T2VQu6STr22DABekAsCKWM/agro-bg-1-h7DYVoR3RjpZr7rGKPshop.webp';
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden flex items-center justify-center p-2 sm:p-4">
-      {/* Animated Background Gradients */}
-      <div className="fixed inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-40 h-40 sm:w-64 sm:h-64 bg-accent rounded-full mix-blend-screen filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-40 h-40 sm:w-64 sm:h-64 bg-cyan-400 rounded-full mix-blend-screen filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
+    <div
+      className="min-h-screen w-full bg-cover bg-center flex flex-col items-center justify-center relative overflow-hidden"
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      {/* Decorative Side Lines */}
-      <div className="fixed left-0 top-0 bottom-0 w-px bg-gradient-to-b from-accent via-accent/50 to-transparent opacity-30"></div>
-      <div className="fixed right-0 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-400 via-cyan-400/50 to-transparent opacity-30"></div>
-
-      {/* Main Container - COMPACTO */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="relative z-10 w-full max-w-xs"
-      >
-        {/* Logo Section - MUITO PEQUENO */}
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-sm px-6 flex flex-col items-center justify-center min-h-screen">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-center mb-3"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
         >
-          {/* Animated Logo */}
-          <div className="flex justify-center mb-2">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-              className="relative w-12 h-12 sm:w-16 sm:h-16"
-            >
-              {/* Outer hexagon */}
-              <div className="absolute inset-0 border-2 border-accent rounded-lg opacity-40 transform rotate-45"></div>
-              {/* Inner hexagon */}
-              <div className="absolute inset-2 border border-cyan-400 rounded-lg opacity-60 transform rotate-45"></div>
-              {/* Center B */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xl sm:text-2xl font-bold bg-gradient-to-br from-accent to-cyan-400 bg-clip-text text-transparent">B</span>
-              </div>
-            </motion.div>
-          </div>
+          <motion.div
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-accent to-cyan-400 rounded-full flex items-center justify-center shadow-lg shadow-accent/50"
+          >
+            <Smartphone size={40} className="text-black" />
+          </motion.div>
 
-          {/* Title - PEQUENO */}
-          <h1 className="text-lg sm:text-2xl font-bold mb-0.5 tracking-wider">
+          <h1 className="text-4xl font-bold mb-2">
             <span className="text-accent">BOVISION</span>
-            <br />
-            <span className="text-cyan-400">AI</span>
+            <span className="text-white"> AI</span>
           </h1>
-
-          {/* Subtitle */}
-          <div className="flex items-center justify-center gap-1 mb-0.5">
-            <div className="w-4 h-px bg-accent/50"></div>
-            <p className="text-xs text-gray-400 tracking-widest font-mono">AI PIN</p>
-            <div className="w-4 h-px bg-accent/50"></div>
-          </div>
-
-          {/* Description */}
-          <p className="text-xs text-gray-500 tracking-wide">Acesso Seguro</p>
+          <p className="text-gray-300 text-sm">Visão Inteligente para a Nova Pecuária</p>
         </motion.div>
 
-        {/* Device ID Section - COMPACTO */}
+        {/* PIN Display */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="mb-3"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="mb-12 w-full"
         >
-          <div className="relative border-2 border-accent/60 rounded-lg p-2.5 bg-black/60 backdrop-blur-sm hover:border-accent/100 transition-all duration-300 group">
-            <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-cyan-400/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-            <p className="text-xs text-gray-400 mb-0.5 relative z-10 tracking-widest font-mono">DEVICE ID</p>
-            <div className="flex items-center justify-between relative z-10">
-              <p className="text-sm sm:text-lg font-mono font-bold text-accent tracking-wider">{deviceId}</p>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={copyDeviceId}
-                className="p-1 hover:bg-accent/20 rounded-lg transition-all duration-200"
-                title="Copiar Device ID"
+          <div className="flex justify-center gap-3 mb-6">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <motion.div
+                key={i}
+                initial={{ scale: 0.8 }}
+                animate={{ scale: pin.length > i ? 1.1 : 1 }}
+                transition={{ type: 'spring', stiffness: 300 }}
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-2 transition ${
+                  pin.length > i
+                    ? 'bg-accent/30 border-accent text-accent'
+                    : 'bg-white/10 border-white/20 text-white/50'
+                }`}
               >
-                {copied ? (
-                  <Check size={14} className="text-green-400" />
-                ) : (
-                  <Copy size={14} className="text-accent" />
-                )}
+                {pin.length > i ? '●' : '○'}
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Error Message */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="text-center text-red-400 text-sm font-medium mb-4"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <p className="text-center text-gray-400 text-sm">
+            {pin.length === 0 ? 'Digite seu PIN de 6 dígitos' : `${6 - pin.length} dígitos restantes`}
+          </p>
+        </motion.div>
+
+        {/* Keypad */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="w-full mb-8"
+        >
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+              <motion.button
+                key={num}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleNumberClick(num.toString())}
+                disabled={pin.length >= 6 || isLoading}
+                className="aspect-square rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 hover:border-accent/50 text-white font-bold text-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {num}
               </motion.button>
-            </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleNumberClick('0')}
+              disabled={pin.length >= 6 || isLoading}
+              className="col-span-2 aspect-square rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 hover:border-accent/50 text-white font-bold text-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              0
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleBackspace}
+              disabled={pin.length === 0 || isLoading}
+              className="aspect-square rounded-2xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 hover:border-red-500/50 text-red-400 font-bold text-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              ←
+            </motion.button>
           </div>
         </motion.div>
 
-        {/* PIN Input Label */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="mb-2"
-        >
-          <p className="text-xs text-gray-400 text-center tracking-widest font-mono">DIGITE PIN 6 DÍGITOS</p>
-        </motion.div>
-
-        {/* PIN Dots Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.45, duration: 0.6 }}
-          className="flex justify-center gap-1.5 mb-3"
-        >
-          {[...Array(6)].map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ scale: 0.8 }}
-              animate={{ scale: pin.length > i ? 1.2 : 0.8 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className={`w-2 h-2 rounded-full border-2 transition-all duration-200 ${
-                pin.length > i
-                  ? 'bg-accent border-accent shadow-lg shadow-accent/50'
-                  : 'border-accent/40 bg-transparent'
-              }`}
-            ></motion.div>
-          ))}
-        </motion.div>
-
-        {/* Numpad Grid - COMPACTO */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          className="grid grid-cols-3 gap-1.5 mb-3"
-        >
-          {/* Numbers 1-9 */}
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-            <motion.button
-              key={num}
-              whileHover={{ scale: 1.05, borderColor: '#00FF41' }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleNumpad(num.toString())}
-              disabled={pin.length >= 6}
-              className="aspect-square rounded-lg border-2 border-accent/60 bg-black/50 backdrop-blur-sm text-sm sm:text-base font-bold text-white hover:border-accent hover:bg-accent/10 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {num}
-            </motion.button>
-          ))}
-
-          {/* Row 4: Biometric, 0, Backspace */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="aspect-square rounded-lg border-2 border-accent/60 bg-black/50 backdrop-blur-sm text-sm hover:border-accent hover:bg-accent/10 transition-all duration-200"
-            title="Biometric"
-          >
-            👆
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05, borderColor: '#00FF41' }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleNumpad('0')}
-            disabled={pin.length >= 6}
-            className="aspect-square rounded-lg border-2 border-accent/60 bg-black/50 backdrop-blur-sm text-sm sm:text-base font-bold text-white hover:border-accent hover:bg-accent/10 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            0
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05, borderColor: '#00FF41' }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleBackspace}
-            className="aspect-square rounded-lg border-2 border-accent/60 bg-black/50 backdrop-blur-sm text-sm hover:border-accent hover:bg-accent/10 transition-all duration-200"
-            title="Backspace"
-          >
-            ✕
-          </motion.button>
-        </motion.div>
-
-        {/* Login Button */}
+        {/* Submit Button */}
         <motion.button
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleLogin}
+          onClick={handleSubmit}
           disabled={pin.length !== 6 || isLoading}
-          className="w-full py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-accent to-cyan-400 text-black font-bold text-sm hover:shadow-lg hover:shadow-accent/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mb-2 tracking-wide"
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-accent to-cyan-400 text-black font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-accent/50 hover:shadow-xl hover:shadow-accent/70 flex items-center justify-center gap-2"
         >
           {isLoading ? (
-            <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }}>
-              ⟳
-            </motion.span>
+            <>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                className="w-5 h-5 border-2 border-black border-t-transparent rounded-full"
+              />
+              Verificando...
+            </>
+          ) : success ? (
+            <>
+              <Check size={20} />
+              Acesso Concedido!
+            </>
           ) : (
-            'ENTRAR'
+            <>
+              Entrar
+              <ChevronRight size={20} />
+            </>
           )}
         </motion.button>
 
-        {/* System Status */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
-          className="p-2.5 rounded-lg border-2 border-accent/40 bg-black/60 backdrop-blur-sm text-center"
-        >
-          <div className="flex items-center justify-center gap-1.5 mb-0.5">
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-2 h-2 bg-green-400 rounded-full"
-            ></motion.div>
-            <p className="text-xs font-bold text-accent tracking-widest">SISTEMA SEGURO</p>
-          </div>
-          <p className="text-xs text-gray-500 tracking-wide">Todos os Sistemas Protegidos</p>
-        </motion.div>
-
-        {/* Footer */}
+        {/* Footer Info */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-          className="text-center mt-3 text-xs text-gray-600 tracking-widest space-y-0.5"
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="mt-12 text-center text-xs text-gray-400"
         >
-          <p>BOVISION AI PROTECTION</p>
-          <p>SEGURANÇA AVANÇADA</p>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Lock size={14} />
+            <span>Conexão Segura</span>
+          </div>
+          <p>Seu PIN é criptografado e seguro</p>
         </motion.div>
-      </motion.div>
+      </div>
+
+      {/* Floating Elements */}
+      <motion.div
+        animate={{ y: [0, -20, 0] }}
+        transition={{ duration: 4, repeat: Infinity }}
+        className="absolute top-20 right-10 w-32 h-32 bg-accent/10 rounded-full blur-3xl"
+      />
+      <motion.div
+        animate={{ y: [0, 20, 0] }}
+        transition={{ duration: 5, repeat: Infinity }}
+        className="absolute bottom-20 left-10 w-40 h-40 bg-cyan-400/10 rounded-full blur-3xl"
+      />
     </div>
   );
 };
