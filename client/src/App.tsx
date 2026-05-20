@@ -14,6 +14,14 @@ import AdminPanel from "./pages/AdminPanel";
 import WeighingHistory from "./pages/WeighingHistory";
 import VaccinationCalendar from "./pages/VaccinationCalendar";
 import FinancialControl from "./pages/FinancialControl";
+import Analytics from "./pages/Analytics";
+import Health from "./pages/Health";
+import AIInsights from "./pages/AIInsights";
+import Pasture from "./pages/Pasture";
+import Nutrition from "./pages/Nutrition";
+import Alerts from "./pages/Alerts";
+import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
 import { useAuth } from "./_core/hooks/useAuth";
 
 function Router() {
@@ -30,6 +38,14 @@ function Router() {
       <Route path={"/app/pesagem-historico"} component={WeighingHistory} />
       <Route path={"/app/vacinacao"} component={VaccinationCalendar} />
       <Route path={"/app/financeiro"} component={FinancialControl} />
+      <Route path={"/app/analytics"} component={Analytics} />
+      <Route path={"/app/health"} component={Health} />
+      <Route path={"/app/ai-insights"} component={AIInsights} />
+      <Route path={"/app/pasture"} component={Pasture} />
+      <Route path={"/app/nutrition"} component={Nutrition} />
+      <Route path={"/app/alerts"} component={Alerts} />
+      <Route path={"/app/reports"} component={Reports} />
+      <Route path={"/app/settings"} component={Settings} />
       <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/admin-login"} component={() => <div>Admin Login</div>} />
       <Route path={"/planos"} component={() => <Landing />} />
