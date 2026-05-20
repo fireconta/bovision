@@ -1,30 +1,30 @@
 # BOVISION AI — TODO List
 
 ## Landing Page
-- [ ] Hero section com animação neon e slogan
-- [ ] Secção de benefícios com cards
-- [ ] Demonstração de IA com mockup
-- [ ] Estatísticas e números
-- [ ] Secção de planos (mensal e anual)
-- [ ] FAQ com accordion
-- [ ] CTA (Call to Action) premium
-- [ ] Footer com links
+- [x] Hero section com animação neon e slogan
+- [x] Secção de benefícios com cards
+- [x] Demonstração de IA com mockup
+- [x] Estatísticas e números
+- [x] Secção de planos (mensal e anual)
+- [x] FAQ com accordion
+- [x] CTA (Call to Action) premium
+- [x] Footer com links
 
 ## Autenticação e Segurança
-- [ ] Sistema de Device ID (BV-XXXXXXXX)
-- [ ] Geração de PIN de 6 dígitos com validações
-- [ ] Tela de login PIN com teclado numérico
-- [ ] Verificação de sessão e expiração
-- [ ] Armazenamento seguro em localStorage/sessionStorage
+- [x] Sistema de Device ID (BV-XXXXXXXX)
+- [x] Geração de PIN de 6 dígitos com validações
+- [x] Tela de login PIN com teclado numérico
+- [x] Verificação de sessão e expiração
+- [x] Armazenamento seguro em localStorage/sessionStorage
 - [ ] Splash screen com estilo nativo
 - [ ] Loading screen futurista
-- [ ] Rate limiting e anti brute-force
+- [x] Rate limiting e anti brute-force
 - [ ] Logs de segurança
 
 ## Dashboard Principal
-- [ ] Layout com sidebar e header
-- [ ] Cards de métricas (Total Animais, Peso Médio, Ganho Diário, etc)
-- [ ] Gráficos com Recharts (realtime)
+- [x] Layout com sidebar e header
+- [x] Cards de métricas (Total Animais, Peso Médio, Ganho Diário, etc)
+- [x] Gráficos com Recharts (realtime)
 - [ ] Timeline do rebanho
 - [ ] Atividade recente
 - [ ] Indicadores de IA
@@ -33,11 +33,11 @@
 - [ ] Sincronização cloud entre dispositivos
 
 ## Gestão de Rebanho
-- [ ] Cadastro de animais com foto
-- [ ] Campos: raça, idade, sexo, peso, vacinação
-- [ ] Evolução e histórico completo
-- [ ] Timeline individual por animal
-- [ ] Edição e deleção de animais
+- [x] Cadastro de animais com foto
+- [x] Campos: raça, idade, sexo, peso, vacinação
+- [x] Evolução e histórico completo
+- [x] Timeline individual por animal
+- [x] Edição e deleção de animais
 - [ ] Busca e filtros avançados
 - [ ] Exportação de dados
 
@@ -52,11 +52,11 @@
 - [ ] Captura inteligente com estabilização visual
 
 ## Assistente IA Agro
-- [ ] Interface de chat estilo ChatGPT
+- [x] Interface de chat estilo ChatGPT
 - [ ] Integração com LLM (invokeLLM)
-- [ ] Respostas humanizadas sobre manejo, alimentação, vacinação
-- [ ] Typing animation
-- [ ] Suporte a markdown com Streamdown
+- [x] Respostas humanizadas sobre manejo, alimentação, vacinação
+- [x] Typing animation
+- [x] Suporte a markdown com Streamdown
 - [ ] Histórico de conversas
 - [ ] Cache de análises
 - [ ] Loading inteligente com porcentagem
@@ -120,12 +120,12 @@
 
 ## Painel Administrativo (/admin)
 - [ ] Login admin seguro (senha: LVz@65245)
-- [ ] Visualizar todos os utilizadores
+- [x] Visualizar todos os utilizadores
 - [ ] Visualizar PINs
 - [ ] Alterar PINs
 - [ ] Resetar PIN
-- [ ] Bloquear/desbloquear utilizadores
-- [ ] Deletar utilizadores
+- [x] Bloquear/desbloquear utilizadores
+- [x] Deletar utilizadores
 - [ ] Ativar/remover premium
 - [ ] Visualizar pagamentos
 - [ ] Visualizar dispositivos
@@ -133,25 +133,25 @@
 - [ ] Visualizar logs
 - [ ] Estender trial
 - [ ] Alterar planos
-- [ ] Enviar notificações
-- [ ] Tabela com BV-ID, PIN, plano, trial, status, IP, dispositivo, último acesso
+- [x] Enviar notificações
+- [x] Tabela com BV-ID, PIN, plano, trial, status, IP, dispositivo, último acesso
 
 ## Banco de Dados
-- [ ] Tabela users
-- [ ] Tabela devices
-- [ ] Tabela pins
-- [ ] Tabela licenses
-- [ ] Tabela animals
-- [ ] Tabela weights
-- [ ] Tabela vaccines
-- [ ] Tabela financial
-- [ ] Tabela reports
-- [ ] Tabela analytics
-- [ ] Tabela payments
-- [ ] Tabela sessions
-- [ ] Tabela notifications
-- [ ] Tabela logs
-- [ ] Tabela admin_logs
+- [x] Tabela users
+- [x] Tabela devices
+- [x] Tabela pins
+- [x] Tabela licenses
+- [x] Tabela animals
+- [x] Tabela weights
+- [x] Tabela vaccines
+- [x] Tabela financial
+- [x] Tabela reports
+- [x] Tabela analytics
+- [x] Tabela payments
+- [x] Tabela sessions
+- [x] Tabela notifications
+- [x] Tabela logs
+- [x] Tabela admin_logs
 
 ## Armazenamento de Ficheiros
 - [ ] Upload de fotos de animais
@@ -160,15 +160,15 @@
 - [ ] Integração com S3 via storagePut
 
 ## Design e UX
-- [ ] Paleta de cores dark neon (preto, verde neon, azul elétrico, branco)
-- [ ] Tipografia futurista
-- [ ] Glassmorphism e backdrop blur
-- [ ] Neon glow effects
-- [ ] Animações com Framer Motion
-- [ ] Transições fluidas
-- [ ] Responsividade mobile-first
+- [x] Paleta de cores dark neon (preto, verde neon, azul elétrico, branco)
+- [x] Tipografia futurista
+- [x] Glassmorphism e backdrop blur
+- [x] Neon glow effects
+- [x] Animações com Framer Motion
+- [x] Transições fluidas
+- [x] Responsividade mobile-first
 - [ ] PWA com splash screen
-- [ ] Experiência app-like
+- [x] Experiência app-like
 
 ## Testes e Qualidade
 - [ ] Testes unitários com Vitest

@@ -9,6 +9,7 @@ import PinLogin from "./pages/PinLogin";
 import Dashboard from "./pages/Dashboard";
 import HerdManagement from "./pages/HerdManagement";
 import AiAssistant from "./pages/AiAssistant";
+import AiWeighing from "./pages/AiWeighing";
 import AdminPanel from "./pages/AdminPanel";
 import { useAuth } from "./_core/hooks/useAuth";
 
@@ -22,6 +23,7 @@ function Router() {
       <Route path={"/app"} component={Dashboard} />
       <Route path={"/app/rebanho"} component={HerdManagement} />
       <Route path={"/app/assistente"} component={AiAssistant} />
+      <Route path={"/app/pesagem"} component={AiWeighing} />
       <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/admin-login"} component={() => <div>Admin Login</div>} />
       <Route path={"/planos"} component={() => <Landing />} />

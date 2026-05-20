@@ -29,9 +29,11 @@ export default function Landing() {
             animate={{ opacity: 1 }}
             className="flex items-center gap-2"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-accent to-secondary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">🐂</span>
-            </div>
+            <img 
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663677906549/T2VQu6STr22DABekAsCKWM/bovision-logo-icon-N3FvpqH9Q3jqzfuhPUHYM9.webp" 
+              alt="BOVISION AI Logo" 
+              className="w-8 h-8"
+            />
             <span className="font-bold text-lg gradient-text">BOVISION AI</span>
           </motion.div>
           
