@@ -40,24 +40,33 @@ function validatePinSecurity(pin: string): { valid: boolean; reason?: string } {
     return { valid: false, reason: "PIN muito fraco: não use pares repetidos (ex: 112233)." };
   }
 
-  // Rule 5: Max 3 consecutive same digits
+  // Rule 5: Alternating pairs (117744, 223344, etc.)
+  let repeatBlockCount = 0;
+  for (let i = 0; i < digits.length - 1; i++) {
+    if (digits[i] === digits[i + 1]) repeatBlockCount++;
+  }
+  if (repeatBlockCount >= 4) {
+    return { valid: false, reason: "PIN muito fraco: muitos dígitos repetidos consecutivos." };
+  }
+
+  // Rule 6: Known weak PINs
+  const knownWeak = ["123456", "654321", "112233", "332211", "445566", "665544", "778899", "998877", "121212", "010101", "000000", "999999", "123123", "456456", "789789"];
+  if (knownWeak.includes(pin)) {
+    return { valid: false, reason: "Este PIN é muito comum e não é permitido por segurança." };
+  }
+
+  // Rule 7: Max 3 consecutive same digits
   for (let i = 0; i < digits.length - 2; i++) {
     if (digits[i] === digits[i + 1] && digits[i + 1] === digits[i + 2]) {
       return { valid: false, reason: "PIN fraco: não use 3 ou mais dígitos iguais seguidos (ex: 111, 222)." };
     }
   }
 
-  // Rule 6: Max 4 of the same digit in total
+  // Rule 8: Max 4 of the same digit in total
   const freq: Record<number, number> = {};
   for (const d of digits) freq[d] = (freq[d] || 0) + 1;
   if (Math.max(...Object.values(freq)) >= 4) {
     return { valid: false, reason: "PIN fraco: um mesmo dígito não pode aparecer 4 ou mais vezes." };
-  }
-
-  // Rule 7: Known weak PINs
-  const knownWeak = ["123456", "654321", "112233", "332211", "445566", "665544", "000000", "999999", "121212", "010101"];
-  if (knownWeak.includes(pin)) {
-    return { valid: false, reason: "Este PIN é muito comum e não é permitido por segurança." };
   }
 
   return { valid: true };
@@ -81,7 +90,7 @@ function getOrCreateDeviceId(): string {
 // ============================================================
 function PinDots({ pin, maxLen = 6 }: { pin: string; maxLen?: number }) {
   return (
-    <div className="flex gap-3 justify-center my-6">
+    <div className="flex gap-3 justify-center my-4">
       {Array.from({ length: maxLen }).map((_, i) => (
         <motion.div
           key={i}
@@ -97,7 +106,7 @@ function PinDots({ pin, maxLen = 6 }: { pin: string; maxLen?: number }) {
 function NumericKeypad({ onPress, onDelete, disabled }: { onPress: (d: string) => void; onDelete: () => void; disabled?: boolean }) {
   const keys = ["1","2","3","4","5","6","7","8","9","","0","⌫"];
   return (
-    <div className="grid grid-cols-3 gap-3 w-full max-w-[280px] mx-auto mt-6">
+    <div className="grid grid-cols-3 gap-2 w-full max-w-[240px] mx-auto mt-4">
       {keys.map((k, i) => {
         if (k === "") return <div key={i} />;
         const isDelete = k === "⌫";
@@ -107,14 +116,14 @@ function NumericKeypad({ onPress, onDelete, disabled }: { onPress: (d: string) =
             whileTap={{ scale: 0.92 }}
             disabled={disabled}
             onClick={() => isDelete ? onDelete() : onPress(k)}
-            className={`h-16 rounded-xl font-mono text-xl font-bold transition-all border
+            className={`h-14 rounded-xl font-mono text-lg font-bold transition-all border
               ${isDelete
                 ? "border-[oklch(0.30_0.06_0)] text-[oklch(0.60_0.08_0)] hover:bg-[oklch(0.18_0.04_0/0.5)] active:bg-[oklch(0.22_0.04_0/0.5)]"
                 : "border-[oklch(0.28_0.06_210)] text-white hover:bg-[oklch(0.20_0.08_210/0.5)] hover:border-[oklch(0.55_0.18_210/0.6)] active:bg-[oklch(0.25_0.10_210/0.6)]"
               }
               disabled:opacity-40 disabled:cursor-not-allowed`}
           >
-            {isDelete ? <Delete className="w-6 h-6 mx-auto" /> : k}
+            {isDelete ? <Delete className="w-5 h-5 mx-auto" /> : k}
           </motion.button>
         );
       })}
@@ -223,7 +232,7 @@ export default function Aplicativo() {
           setTimeout(() => navigate("/app"), 1200);
         }, 800);
       } else {
-        setError("PIN incorreto");
+        setError("PIN incorreto. Tente novamente.");
         setPin("");
         setTimeout(() => {
           setFlowState("pin_entry");
@@ -234,190 +243,144 @@ export default function Aplicativo() {
     }
   }, [pin, flowState, deviceId, navigate]);
 
-  const bgImage = "https://d2xsxph8kpxj0f.cloudfront.net/310519663677906549/T2VQu6STr22DABekAsCKWM/agro-bg-1-h7DYVoR3RjpZr7rGKPshop.webp";
-
+  // ---- RENDER ----
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{
-        backgroundImage: `url(${bgImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center relative overflow-hidden px-4">
+      {/* Background grid */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        backgroundImage: "linear-gradient(oklch(0.75 0.18 210 / 0.04) 1px, transparent 1px), linear-gradient(90deg, oklch(0.75 0.18 210 / 0.04) 1px, transparent 1px)",
+        backgroundSize: "40px 40px",
+      }} />
+      
+      {/* Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, oklch(0.75 0.18 210 / 0.06) 0%, transparent 70%)" }} />
 
-      {/* Content */}
+      {/* Card */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-md"
+        className="relative z-10 w-full max-w-sm"
       >
-        <div className="glass rounded-3xl border border-[oklch(0.75_0.18_210/0.2)] p-8 shadow-2xl">
-          {/* Logo & Title */}
-          <div className="text-center mb-8">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-cyan-500/50"
-            >
-              <div className="text-3xl font-bold text-black">🐄</div>
-            </motion.div>
-            <h1 className="text-3xl font-bold text-white mb-2">BOVISION AI</h1>
-            <p className="text-[oklch(0.75_0.18_210)] text-sm">Visão Inteligente para a Nova Pecuária</p>
-          </div>
-
-          {/* Flow: Loading */}
-          <AnimatePresence mode="wait">
-            {flowState === "loading" && (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-center py-8"
-              >
-                <Loader2 className="w-8 h-8 animate-spin mx-auto text-cyan-400 mb-4" />
-                <p className="text-[oklch(0.75_0.18_210)]">Inicializando...</p>
-              </motion.div>
-            )}
-
-            {/* Flow: Create PIN */}
-            {flowState === "new_device_create_pin" && (
-              <motion.div
-                key="create_pin"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-              >
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-bold text-white mb-2">Criar PIN de Segurança</h2>
-                  <p className="text-sm text-[oklch(0.75_0.18_210)]">Escolha um PIN de 6 dígitos seguro</p>
-                </div>
-                <PinDots pin={pin} />
-                <NumericKeypad onPress={handlePinPress} onDelete={handlePinDelete} />
-                {pinError && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center"
-                  >
-                    {pinError}
-                  </motion.div>
-                )}
-              </motion.div>
-            )}
-
-            {/* Flow: Confirm PIN */}
-            {flowState === "new_device_confirm_pin" && (
-              <motion.div
-                key="confirm_pin"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-              >
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-bold text-white mb-2">Confirmar PIN</h2>
-                  <p className="text-sm text-[oklch(0.75_0.18_210)]">Digite o PIN novamente para confirmar</p>
-                </div>
-                <PinDots pin={pin} />
-                <NumericKeypad onPress={handlePinPress} onDelete={handlePinDelete} />
-              </motion.div>
-            )}
-
-            {/* Flow: PIN Mismatch */}
-            {flowState === "pin_mismatch" && (
-              <motion.div
-                key="pin_mismatch"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="text-center py-8"
-              >
-                <AlertTriangle className="w-12 h-12 mx-auto text-red-400 mb-4" />
-                <h2 className="text-lg font-bold text-white mb-2">PINs não correspondem</h2>
-                <p className="text-sm text-[oklch(0.75_0.18_210)]">Tente novamente...</p>
-              </motion.div>
-            )}
-
-            {/* Flow: PIN Entry */}
-            {flowState === "pin_entry" && (
-              <motion.div
-                key="pin_entry"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-              >
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-bold text-white mb-2">Digite seu PIN</h2>
-                  <p className="text-sm text-[oklch(0.75_0.18_210)]">Acesso seguro ao aplicativo</p>
-                </div>
-                <PinDots pin={pin} />
-                <NumericKeypad onPress={handlePinPress} onDelete={handlePinDelete} />
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-              </motion.div>
-            )}
-
-            {/* Flow: Verifying */}
-            {flowState === "verifying" && (
-              <motion.div
-                key="verifying"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-center py-8"
-              >
-                <Loader2 className="w-8 h-8 animate-spin mx-auto text-cyan-400 mb-4" />
-                <p className="text-[oklch(0.75_0.18_210)]">Verificando PIN...</p>
-              </motion.div>
-            )}
-
-            {/* Flow: Success */}
-            {flowState === "success" && (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="text-center py-8"
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <ShieldCheck className="w-12 h-12 mx-auto text-green-400 mb-4" />
-                </motion.div>
-                <h2 className="text-lg font-bold text-white mb-2">Acesso Concedido!</h2>
-                <p className="text-sm text-[oklch(0.75_0.18_210)]">Redirecionando...</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Device ID */}
-          <div className="mt-8 pt-6 border-t border-[oklch(0.75_0.18_210/0.1)]">
-            <div className="text-center">
-              <p className="text-xs text-[oklch(0.50_0.04_220)] mb-1">Device ID</p>
-              <p className="text-sm font-mono text-[oklch(0.75_0.18_210)] font-bold">{deviceId}</p>
-            </div>
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-400 to-cyan-500 flex items-center justify-center drop-shadow-[0_0_12px_oklch(0.75_0.18_210/0.5)]">
+            <span className="text-2xl font-bold">🐄</span>
           </div>
         </div>
 
-        {/* Security Badge */}
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30">
-            <ShieldCheck className="w-4 h-4 text-green-400" />
-            <span className="text-xs font-mono text-green-400">SISTEMA SEGURO</span>
-          </div>
+        <div className="rounded-2xl border border-[oklch(0.28_0.06_210/0.4)] bg-[oklch(0.10_0.02_220/0.85)] backdrop-blur-xl p-8 shadow-[0_0_40px_oklch(0.75_0.18_210/0.08)]">
+
+          <AnimatePresence mode="wait">
+
+            {/* LOADING */}
+            {flowState === "loading" && (
+              <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-8">
+                <Loader2 className="w-8 h-8 mx-auto animate-spin text-[oklch(0.75_0.18_210)]" />
+                <p className="font-mono text-xs text-[oklch(0.45_0.04_220)] mt-3 tracking-widest">IDENTIFICANDO DISPOSITIVO...</p>
+              </motion.div>
+            )}
+
+            {/* CREATE PIN */}
+            {flowState === "new_device_create_pin" && (
+              <motion.div key="create" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <div className="text-center mb-2">
+                  <ShieldCheck className="w-8 h-8 mx-auto text-[oklch(0.75_0.18_210)] mb-3" />
+                  <h2 className="text-white font-bold text-lg">Criar PIN de Acesso</h2>
+                  <p className="text-[oklch(0.50_0.04_220)] text-sm mt-1">Escolha um PIN de 6 dígitos seguro</p>
+                </div>
+                <div className="mt-1 mb-1 text-center">
+                  <p className="font-mono text-[0.65rem] text-[oklch(0.40_0.06_210)] tracking-wider">ID: {deviceId}</p>
+                </div>
+                <PinDots pin={pin} />
+                {pinError && (
+                  <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+                    className="flex items-start gap-2 bg-[oklch(0.18_0.06_30/0.5)] border border-[oklch(0.35_0.10_30/0.5)] rounded-lg p-3 mb-2">
+                    <AlertTriangle className="w-4 h-4 text-[oklch(0.70_0.15_30)] shrink-0 mt-0.5" />
+                    <p className="text-[oklch(0.70_0.15_30)] text-xs">{pinError}</p>
+                  </motion.div>
+                )}
+                <NumericKeypad onPress={handlePinPress} onDelete={handlePinDelete} />
+                <div className="mt-5 rounded-lg bg-[oklch(0.12_0.04_210/0.5)] border border-[oklch(0.22_0.06_210/0.4)] p-3">
+                  <p className="text-[0.65rem] text-[oklch(0.40_0.06_210)] text-center leading-relaxed">
+                    🔒 Segurança bancária: evite sequências (123456), repetições (111111) e padrões simples
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* CONFIRM PIN */}
+            {flowState === "new_device_confirm_pin" && (
+              <motion.div key="confirm" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <div className="text-center mb-2">
+                  <ShieldCheck className="w-8 h-8 mx-auto text-[oklch(0.65_0.20_145)] mb-3" />
+                  <h2 className="text-white font-bold text-lg">Confirmar PIN</h2>
+                  <p className="text-[oklch(0.50_0.04_220)] text-sm mt-1">Digite o PIN novamente para confirmar</p>
+                </div>
+                <PinDots pin={pin} />
+                <NumericKeypad onPress={handlePinPress} onDelete={handlePinDelete} />
+              </motion.div>
+            )}
+
+            {/* PIN MISMATCH */}
+            {flowState === "pin_mismatch" && (
+              <motion.div key="mismatch" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="text-center py-8">
+                <motion.div animate={{ rotate: [0, -10, 10, -10, 10, 0] }} transition={{ duration: 0.5 }}>
+                  <AlertTriangle className="w-12 h-12 mx-auto text-[oklch(0.70_0.18_30)] mb-4" />
+                </motion.div>
+                <h2 className="text-white font-bold text-lg mb-2">PINs não coincidem</h2>
+                <p className="text-[oklch(0.50_0.04_220)] text-sm">Vamos recomeçar o cadastro do PIN.</p>
+                <div className="mt-4 h-1 bg-[oklch(0.20_0.04_220)] rounded-full overflow-hidden">
+                  <motion.div initial={{ width: "100%" }} animate={{ width: "0%" }} transition={{ duration: 2.2, ease: "linear" }}
+                    className="h-full bg-[oklch(0.70_0.18_30)]" />
+                </div>
+              </motion.div>
+            )}
+
+            {/* PIN ENTRY (existing device) */}
+            {flowState === "pin_entry" && (
+              <motion.div key="entry" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <div className="text-center mb-2">
+                  <h2 className="text-white font-bold text-lg">Acesso Seguro</h2>
+                  <p className="text-[oklch(0.50_0.04_220)] text-sm mt-1">Digite seu PIN de 6 dígitos</p>
+                  <p className="font-mono text-[0.65rem] text-[oklch(0.35_0.06_210)] mt-1 tracking-wider">{deviceId}</p>
+                </div>
+                <PinDots pin={pin} />
+                {error && (
+                  <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-2 bg-[oklch(0.18_0.06_0/0.5)] border border-[oklch(0.35_0.10_0/0.5)] rounded-lg p-3 mb-2">
+                    <AlertTriangle className="w-4 h-4 text-[oklch(0.65_0.18_0)] shrink-0" />
+                    <p className="text-[oklch(0.65_0.18_0)] text-xs">{error}</p>
+                  </motion.div>
+                )}
+                <NumericKeypad onPress={handlePinPress} onDelete={handlePinDelete} />
+                <p className="text-center text-[0.55rem] text-[oklch(0.28_0.04_220)] mt-5 font-mono">
+                  ID PERMANENTE · NÃO COMPARTILHE SEU PIN
+                </p>
+              </motion.div>
+            )}
+
+            {/* VERIFYING */}
+            {flowState === "verifying" && (
+              <motion.div key="verifying" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-8">
+                <Loader2 className="w-8 h-8 mx-auto animate-spin text-[oklch(0.75_0.18_210)]" />
+                <p className="font-mono text-xs text-[oklch(0.45_0.04_220)] mt-3 tracking-widest">VERIFICANDO...</p>
+              </motion.div>
+            )}
+
+            {/* SUCCESS */}
+            {flowState === "success" && (
+              <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8">
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+                  <ShieldCheck className="w-14 h-14 mx-auto text-[oklch(0.70_0.20_145)] mb-4" />
+                </motion.div>
+                <h2 className="text-white font-bold text-lg">Acesso Autorizado</h2>
+                <p className="text-[oklch(0.50_0.04_220)] text-sm mt-1">Redirecionando...</p>
+              </motion.div>
+            )}
+
+          </AnimatePresence>
         </div>
       </motion.div>
     </div>
