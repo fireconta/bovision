@@ -4,13 +4,28 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import Landing from "./pages/Landing";
+import PinLogin from "./pages/PinLogin";
+import Dashboard from "./pages/Dashboard";
+import HerdManagement from "./pages/HerdManagement";
+import AiAssistant from "./pages/AiAssistant";
+import AdminPanel from "./pages/AdminPanel";
+import { useAuth } from "./_core/hooks/useAuth";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
+  const { isAuthenticated } = useAuth();
+
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      <Route path={"/"} component={Landing} />
+      <Route path={"/aplicativo"} component={PinLogin} />
+      <Route path={"/app"} component={Dashboard} />
+      <Route path={"/app/rebanho"} component={HerdManagement} />
+      <Route path={"/app/assistente"} component={AiAssistant} />
+      <Route path={"/admin"} component={AdminPanel} />
+      <Route path={"/admin-login"} component={() => <div>Admin Login</div>} />
+      <Route path={"/planos"} component={() => <Landing />} />
+      <Route path={"/suporte"} component={() => <div>Suporte</div>} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -27,7 +42,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider
-        defaultTheme="light"
+        defaultTheme="dark"
         // switchable
       >
         <TooltipProvider>
