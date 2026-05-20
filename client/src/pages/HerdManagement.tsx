@@ -1,204 +1,100 @@
-import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus, Edit2, Trash2, Camera, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
-const mockAnimals = [
-  { id: 1, name: 'Bella', breed: 'Holstein', age: 5, weight: 534, lastWeigh: '2026-06-27', status: 'Healthy', vaccineDate: '2026-05-15' },
-  { id: 2, name: 'Midnight', breed: 'Angus', age: 3, weight: 482, lastWeigh: '2026-06-27', status: 'Healthy', vaccineDate: '2026-05-20' },
-  { id: 3, name: 'Clover', breed: 'Simmental', age: 4, weight: 598, lastWeigh: '2026-06-26', status: 'At Risk', vaccineDate: '2026-04-10' },
-];
+const HerdManagement = () => {
+  const [selectedCattle, setSelectedCattle] = useState<any>(null);
 
-export default function HerdManagement() {
-  const [selectedAnimal, setSelectedAnimal] = useState<typeof mockAnimals[0] | null>(null);
+  const cattleList = [
+    { id: '001', name: 'Bella', breed: 'Holstein Friesian', weight: 534, age: 3.5, status: 'Healthy', health: 92, vaccination: 'Up to date', lastUpdate: 'Updated 2 min ago' },
+    { id: '002', name: 'Midnight', breed: 'Angus', weight: 482, age: 2.8, status: 'Healthy', health: 89, vaccination: 'Up to date', lastUpdate: 'Updated 1 min ago' },
+    { id: '003', name: 'Clover', breed: 'Simmental', weight: 598, age: 4.2, status: 'At Risk', health: 68, vaccination: 'Due in 5 days', lastUpdate: 'Updated 3 min ago' },
+    { id: '004', name: 'Daisy', breed: 'Jersey', weight: 412, age: 3.1, status: 'Healthy', health: 91, vaccination: 'Up to date', lastUpdate: 'Updated 2 min ago' },
+    { id: '005', name: 'Rosie', breed: 'Brown Swiss', weight: 620, age: 5.0, status: 'Healthy', health: 94, vaccination: 'Up to date', lastUpdate: 'Updated 1 min ago' },
+    { id: '006', name: 'Luna', breed: 'Charolais', weight: 450, age: 2.3, status: 'Need Attention', health: 42, vaccination: 'Overdue', lastUpdate: 'Updated 4 min ago' },
+    { id: '007', name: 'Molly', breed: 'Holstein Friesian', weight: 544, age: 3.8, status: 'Healthy', health: 90, vaccination: 'Up to date', lastUpdate: 'Updated 3 min ago' },
+    { id: '008', name: 'Maple', breed: 'Angus', weight: 560, age: 4.1, status: 'At Risk', health: 71, vaccination: 'Due in 2 days', lastUpdate: 'Updated 3 min ago' },
+  ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-40">
-        <div className="container py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold gradient-text">Gestão do Rebanho</h1>
-              <p className="text-sm text-muted-foreground">Cadastro e monitoramento de animais</p>
-            </div>
-            <Button className="bg-accent hover:bg-accent/90 text-background">
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Animal
-            </Button>
+    <div className="min-h-screen bg-black text-foreground pt-20 p-4">
+      <div className="max-w-7xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">HERD OVERVIEW</h1>
+          <p className="text-muted-foreground">Real-time monitoring and AI-powered insights</p>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: 'TOTAL CATTLE', value: '128', icon: '🐄', change: '+12 this month' },
+            { label: 'HEALTHY', value: '112', icon: '❤️', change: '87.5% of herd' },
+            { label: 'AT RISK', value: '8', icon: '⚠️', change: '6.3% of herd' },
+            { label: 'NEED ATTENTION', value: '8', icon: '🔒', change: '6.3% of herd' },
+          ].map((stat, i) => (
+            <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }} className="p-4 border border-accent/30 rounded-lg bg-black/50 hover:border-accent/60 transition">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">{stat.icon}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
+              <p className="text-2xl font-bold text-accent">{stat.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{stat.change}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <h2 className="text-xl font-bold mb-4">CATTLE INVENTORY</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {cattleList.map((cattle, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + i * 0.05 }} onClick={() => setSelectedCattle(cattle)} className="p-4 border border-accent/30 rounded-lg bg-black/50 hover:border-accent/60 transition cursor-pointer hover:bg-black/70">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-lg font-bold text-accent">#{cattle.id}</span>
+                  <span className={`text-xs px-2 py-1 rounded font-bold ${cattle.status === 'Healthy' ? 'bg-green-500/20 text-green-400' : cattle.status === 'At Risk' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-orange-500/20 text-orange-400'}`}>{cattle.status}</span>
+                </div>
+                <div className="aspect-square bg-gradient-to-br from-accent/20 to-cyan-500/20 rounded-lg flex items-center justify-center mb-3 text-4xl">🐄</div>
+                <h3 className="text-sm font-bold mb-1">{cattle.name}</h3>
+                <p className="text-xs text-muted-foreground mb-3">{cattle.breed}</p>
+                <div className="space-y-2 text-xs mb-3 pb-3 border-b border-accent/20">
+                  <div className="flex justify-between"><span>Weight:</span><span className="text-accent">{cattle.weight} kg</span></div>
+                  <div className="flex justify-between"><span>Age:</span><span className="text-accent">{cattle.age} years</span></div>
+                  <div className="flex justify-between"><span>Vaccination:</span><span className={cattle.vaccination === 'Up to date' ? 'text-green-400' : 'text-yellow-400'}>{cattle.vaccination}</span></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Health Score</span>
+                  <span className="text-sm font-bold text-accent">{cattle.health}/100</span>
+                </div>
+                <div className="w-full h-1 bg-black/50 rounded-full overflow-hidden mt-1">
+                  <div className={`h-full ${cattle.health >= 80 ? 'bg-green-500' : cattle.health >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${cattle.health}%` }}></div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">{cattle.lastUpdate}</p>
+              </motion.div>
+            ))}
           </div>
-        </div>
-      </div>
+        </motion.div>
 
-      {/* Main content */}
-      <div className="container py-8">
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Animals List */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="lg:col-span-2"
-          >
-            <Card className="p-6 bg-background border-border neon-glow">
-              <h3 className="text-lg font-bold mb-4 gradient-text">Animais Cadastrados ({mockAnimals.length})</h3>
-              
-              <div className="space-y-3">
-                {mockAnimals.map((animal) => (
-                  <motion.div
-                    key={animal.id}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => setSelectedAnimal(animal)}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition ${
-                      selectedAnimal?.id === animal.id
-                        ? 'border-accent bg-accent/10'
-                        : 'border-border hover:border-accent/50'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="font-bold text-lg">{animal.name}</h4>
-                        <p className="text-sm text-muted-foreground">{animal.breed} • {animal.age} anos</p>
-                      </div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          animal.status === 'Healthy'
-                            ? 'bg-accent/20 text-accent'
-                            : 'bg-red-500/20 text-red-500'
-                        }`}
-                      >
-                        {animal.status}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground text-xs">Peso</p>
-                        <p className="font-bold">{animal.weight} kg</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Última Pesagem</p>
-                        <p className="font-bold">{animal.lastWeigh}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Vacinação</p>
-                        <p className="font-bold">{animal.vaccineDate}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+        {selectedCattle && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setSelectedCattle(null)} className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => e.stopPropagation()} className="bg-black border-2 border-accent/30 rounded-lg p-6 max-w-md w-full">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold">{selectedCattle.name}</h2>
+                <button onClick={() => setSelectedCattle(null)} className="text-2xl text-muted-foreground hover:text-accent transition">✕</button>
               </div>
-            </Card>
-          </motion.div>
-
-          {/* Animal Details */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            {selectedAnimal ? (
-              <Card className="p-6 bg-background border-border neon-glow sticky top-24">
-                <h3 className="text-lg font-bold mb-4 gradient-text">Detalhes do Animal</h3>
-                
-                <div className="space-y-4 mb-6">
-                  <div className="w-full h-40 bg-gradient-to-br from-accent/20 to-secondary/20 rounded-lg flex items-center justify-center border border-accent/30">
-                    <Camera className="w-8 h-8 text-accent" />
-                  </div>
-                  
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">NOME</p>
-                    <p className="font-bold text-lg">{selectedAnimal.name}</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">RAÇA</p>
-                      <p className="font-bold">{selectedAnimal.breed}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">IDADE</p>
-                      <p className="font-bold">{selectedAnimal.age} anos</p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">PESO ATUAL</p>
-                      <p className="font-bold text-lg gradient-text">{selectedAnimal.weight} kg</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">STATUS</p>
-                      <p className={`font-bold ${selectedAnimal.status === 'Healthy' ? 'text-accent' : 'text-red-500'}`}>
-                        {selectedAnimal.status}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Button className="w-full bg-accent hover:bg-accent/90 text-background">
-                    <Camera className="w-4 h-4 mr-2" />
-                    Pesagem por IA
-                  </Button>
-                  <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent/10">
-                    <Edit2 className="w-4 h-4 mr-2" />
-                    Editar
-                  </Button>
-                  <Button variant="outline" className="w-full border-red-500 text-red-500 hover:bg-red-500/10">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Deletar
-                  </Button>
-                </div>
-              </Card>
-            ) : (
-              <Card className="p-6 bg-background border-border neon-glow text-center">
-                <p className="text-muted-foreground">Selecione um animal para ver detalhes</p>
-              </Card>
-            )}
-          </motion.div>
-        </div>
-
-        {/* Timeline */}
-        {selectedAnimal && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-8"
-          >
-            <Card className="p-6 bg-background border-border neon-glow">
-              <h3 className="text-lg font-bold mb-6 gradient-text">Histórico de {selectedAnimal.name}</h3>
-              
-              <div className="space-y-4">
-                {[
-                  { date: '2026-06-27', event: 'Pesagem por IA', weight: '534 kg', icon: '⚖️' },
-                  { date: '2026-06-20', event: 'Vacinação aplicada', vaccine: 'Brucela', icon: '💉' },
-                  { date: '2026-06-15', event: 'Exame de saúde', result: 'Normal', icon: '🏥' },
-                  { date: '2026-06-10', event: 'Pesagem manual', weight: '530 kg', icon: '📊' },
-                ].map((entry, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="flex gap-4 pb-4 border-b border-border last:border-b-0"
-                  >
-                    <div className="text-2xl">{entry.icon}</div>
-                    <div className="flex-1">
-                      <p className="text-sm text-muted-foreground">{entry.date}</p>
-                      <p className="font-bold">{entry.event}</p>
-                      {entry.weight && <p className="text-sm text-accent">{entry.weight}</p>}
-                      {entry.vaccine && <p className="text-sm text-accent">{entry.vaccine}</p>}
-                      {entry.result && <p className="text-sm text-accent">{entry.result}</p>}
-                    </div>
-                  </motion.div>
-                ))}
+              <div className="text-4xl mb-4 text-center">🐄</div>
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between"><span>ID:</span><span className="text-accent font-bold">{selectedCattle.id}</span></div>
+                <div className="flex justify-between"><span>Raça:</span><span className="text-accent font-bold">{selectedCattle.breed}</span></div>
+                <div className="flex justify-between"><span>Peso:</span><span className="text-accent font-bold">{selectedCattle.weight} kg</span></div>
+                <div className="flex justify-between"><span>Idade:</span><span className="text-accent font-bold">{selectedCattle.age} anos</span></div>
+                <div className="flex justify-between"><span>Status:</span><span className="text-accent font-bold">{selectedCattle.status}</span></div>
+                <div className="flex justify-between"><span>Saúde:</span><span className="text-accent font-bold">{selectedCattle.health}/100</span></div>
+                <div className="flex justify-between"><span>Vacinação:</span><span className="text-accent font-bold">{selectedCattle.vaccination}</span></div>
               </div>
-            </Card>
+              <button onClick={() => setSelectedCattle(null)} className="w-full py-2 bg-accent text-black font-bold rounded-lg hover:bg-accent/90 transition">Fechar</button>
+            </motion.div>
           </motion.div>
         )}
       </div>
     </div>
   );
-}
+};
+
+export default HerdManagement;
