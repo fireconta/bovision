@@ -16,8 +16,8 @@
 - [x] Tela de login PIN com teclado numérico
 - [x] Verificação de sessão e expiração
 - [x] Armazenamento seguro em localStorage/sessionStorage
-- [ ] Splash screen com estilo nativo
-- [ ] Loading screen futurista
+- [x] Splash screen com estilo nativo
+- [x] Loading screen futurista
 - [x] Rate limiting e anti brute-force
 - [ ] Logs de segurança
 
@@ -48,7 +48,7 @@
 - [x] Análise de altura, largura e volume corporal
 - [x] Cálculo de peso estimado com precisão %
 - [x] Relatório de pesagem
-- [ ] Histórico de pesagens
+- [x] Histórico de pesagens
 - [ ] Captura inteligente com estabilização visual
 
 ## Assistente IA Agro
@@ -69,16 +69,16 @@
 - [ ] Relatórios preditivos
 
 ## Controle Sanitário
-- [ ] Calendário de vacinação
-- [ ] Alertas automáticos de vacinas vencendo
+- [x] Calendário de vacinação
+- [x] Alertas automáticos de vacinas vencendo
 - [ ] Histórico de medicamentos
 - [ ] Registro de doenças
 - [ ] Lembretes sanitários
 
 ## Financeiro Rural
-- [ ] Controle de receitas
-- [ ] Controle de despesas
-- [ ] Cálculo de lucro
+- [x] Controle de receitas
+- [x] Controle de despesas
+- [x] Cálculo de lucro
 - [ ] Custos de alimentação
 - [ ] Custos veterinários
 - [ ] Relatórios financeiros
