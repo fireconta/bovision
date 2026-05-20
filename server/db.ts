@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, devices, pins, sessions, animals, weights, vaccines, notifications } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { eq, desc, and } from "drizzle-orm";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -90,3 +90,142 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // TODO: add feature queries here as your schema grows.
+
+// ============================================================
+// DEVICE & PIN MANAGEMENT
+// ============================================================
+export async function getDeviceByDeviceId(deviceId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(devices).where(eq(devices.deviceId, deviceId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createDevice(data: { deviceId: string; pinHash?: string; userId?: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(devices).values({
+    userId: data.userId || 0,
+    deviceId: data.deviceId,
+  });
+  const device = await getDeviceByDeviceId(data.deviceId);
+  if (!device) throw new Error("Failed to create device");
+  return device;
+}
+
+export async function incrementPinAttempts(deviceId: number) {
+  const db = await getDb();
+  if (!db) return;
+  // Placeholder for PIN attempt tracking
+  // This would be implemented with a separate pins table
+}
+
+export async function resetPinAttempts(deviceId: number) {
+  const db = await getDb();
+  if (!db) return;
+  // Placeholder for PIN attempt reset
+}
+
+export async function updateDevicePin(deviceId: number, pinHash: string) {
+  const db = await getDb();
+  if (!db) return;
+  // Placeholder for PIN update
+  // This would update the pins table
+}
+
+// ============================================================
+// SESSION MANAGEMENT
+// ============================================================
+export async function createSession(data: { deviceId: string; userId?: number; expiresAt: Date }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const crypto = require("crypto");
+  const sessionToken = crypto.randomBytes(32).toString("hex");
+  
+  await db.insert(sessions).values({
+    userId: data.userId || 0,
+    deviceId: data.deviceId,
+    sessionToken,
+    expiresAt: data.expiresAt,
+  });
+  
+  return {
+    sessionToken,
+    expiresAt: data.expiresAt,
+  };
+}
+
+export async function getSessionByToken(sessionToken: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(sessions).where(eq(sessions.sessionToken, sessionToken)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// ============================================================
+// ANIMALS & HERD MANAGEMENT
+// ============================================================
+export async function getUserAnimals(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(animals).where(eq(animals.userId, userId));
+}
+
+export async function getAnimalById(animalId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(animals).where(and(eq(animals.id, animalId), eq(animals.userId, userId))).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createAnimal(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(animals).values(data);
+}
+
+// ============================================================
+// WEIGHT TRACKING
+// ============================================================
+export async function getAnimalWeights(animalId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(weights).where(eq(weights.animalId, animalId)).orderBy(desc(weights.createdAt));
+}
+
+export async function addWeight(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(weights).values(data);
+}
+
+// ============================================================
+// VACCINATION TRACKING
+// ============================================================
+export async function getAnimalVaccines(animalId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(vaccines).where(eq(vaccines.animalId, animalId)).orderBy(desc(vaccines.vaccinationDate));
+}
+
+export async function addVaccine(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(vaccines).values(data);
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+export async function getUserNotifications(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
+}
+
+export async function createNotification(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(notifications).values(data);
+}
