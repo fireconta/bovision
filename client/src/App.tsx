@@ -24,6 +24,7 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import PlansPayment from "./pages/PlansPayment";
 import AppHome from "./pages/AppHome";
+import App from "./pages/App";
 import { useAuth } from "./_core/hooks/useAuth";
 import NotificationContainer from "./components/NotificationContainer";
 
@@ -34,23 +35,22 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Landing} />
       <Route path={"/aplicativo"} component={PinLogin} />
-      <Route path={"/app"} component={Dashboard} />
-      <Route path={"/app/rebanho"} component={HerdManagement} />
-      <Route path={"/app/assistente"} component={AiAssistant} />
-      <Route path={"/app/pesagem"} component={AiWeighing} />
-      <Route path={"/app/pesagem-historico"} component={WeighingHistory} />
-      <Route path={"/app/vacinacao"} component={VaccinationCalendar} />
-      <Route path={"/app/financeiro"} component={FinancialControl} />
-      <Route path={"/app/analytics"} component={Analytics} />
-      <Route path={"/app/health"} component={Health} />
-      <Route path={"/app/ai-insights"} component={AIInsights} />
-      <Route path={"/app/pasture"} component={Pasture} />
-      <Route path={"/app/nutrition"} component={Nutrition} />
-      <Route path={"/app/alerts"} component={Alerts} />
-      <Route path={"app/reports"} component={Reports} />
-      <Route path={"app/settings"} component={Settings} />
-      <Route path={"app/planos"} component={PlansPayment} />
-      <Route path={"app"} component={AppHome} />
+      <Route path={"/app"} component={() => <App><AppHome /></App>} />
+      <Route path={"/app/rebanho"} component={() => <App><HerdManagement /></App>} />
+      <Route path={"/app/assistente"} component={() => <App><AiAssistant /></App>} />
+      <Route path={"/app/pesagem"} component={() => <App><AiWeighing /></App>} />
+      <Route path={"/app/pesagem-historico"} component={() => <App><WeighingHistory /></App>} />
+      <Route path={"/app/vacinacao"} component={() => <App><VaccinationCalendar /></App>} />
+      <Route path={"/app/financeiro"} component={() => <App><FinancialControl /></App>} />
+      <Route path={"/app/analytics"} component={() => <App><Analytics /></App>} />
+      <Route path={"/app/health"} component={() => <App><Health /></App>} />
+      <Route path={"/app/ai-insights"} component={() => <App><AIInsights /></App>} />
+      <Route path={"/app/pasture"} component={() => <App><Pasture /></App>} />
+      <Route path={"/app/nutrition"} component={() => <App><Nutrition /></App>} />
+      <Route path={"/app/alerts"} component={() => <App><Alerts /></App>} />
+      <Route path={"/app/reports"} component={() => <App><Reports /></App>} />
+      <Route path={"/app/settings"} component={() => <App><Settings /></App>} />
+      <Route path={"/app/planos"} component={() => <App><PlansPayment /></App>} />
       <Route path={"admin"} component={AdminPanel} />
       <Route path={"/admin-login"} component={() => <div>Admin Login</div>} />
       <Route path={"/planos"} component={() => <Landing />} />
@@ -67,7 +67,7 @@ function Router() {
 //   to keep consistent foreground/background color across components
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
-function App() {
+function AppWrapper() {
   return (
     <ErrorBoundary>
       <ThemeProvider
@@ -84,4 +84,4 @@ function App() {
   );
 }
 
-export default App;
+export default AppWrapper;

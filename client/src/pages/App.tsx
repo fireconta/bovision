@@ -256,7 +256,7 @@ function ModuleContent({ moduleId }: { moduleId: string }) {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function App() {
+export default function App({ children }: { children?: React.ReactNode }) {
   const [, navigate] = useLocation();
   const [activeModule, setActiveModule] = useState("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -334,7 +334,9 @@ export default function App() {
         <div className="flex-1 overflow-auto">
           <div className="p-4 lg:p-8 max-w-7xl mx-auto">
             <AnimatePresence mode="wait">
-              {activeModule === "dashboard" ? (
+              {children ? (
+                children
+              ) : activeModule === "dashboard" ? (
                 <DashboardContent />
               ) : (
                 <ModuleContent moduleId={activeModule} />
