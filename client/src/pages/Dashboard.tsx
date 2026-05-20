@@ -6,7 +6,6 @@ import { useLocation } from 'wouter';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const [location, setLocation] = useLocation();
 
   const menuItems = [
@@ -42,19 +41,15 @@ const Dashboard = () => {
     { id: '002', name: 'Midnight', breed: 'Angus', weight: 482, age: 2.8, status: 'Healthy', health: 89 },
     { id: '003', name: 'Clover', breed: 'Simmental', weight: 598, age: 4.2, status: 'At Risk', health: 68 },
     { id: '004', name: 'Daisy', breed: 'Jersey', weight: 412, age: 3.1, status: 'Healthy', health: 91 },
-    { id: '005', name: 'Rosie', breed: 'Brown Swiss', weight: 620, age: 5.0, status: 'Healthy', health: 94 },
-    { id: '006', name: 'Luna', breed: 'Charolais', weight: 450, age: 2.3, status: 'Need Attention', health: 42 },
-    { id: '007', name: 'Molly', breed: 'Holstein Friesian', weight: 544, age: 3.8, status: 'Healthy', health: 90 },
-    { id: '008', name: 'Maple', breed: 'Angus', weight: 560, age: 4.1, status: 'At Risk', health: 71 },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-slate-950 to-black text-white overflow-hidden">
+    <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl border-b border-cyan-500/20 px-4 sm:px-6 py-4"
+        className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-cyan-500/20 px-4 sm:px-6 py-3 sm:py-4"
       >
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
@@ -71,7 +66,7 @@ const Dashboard = () => {
                   <span className="text-lime-400">BOVISION</span>
                   <span className="text-cyan-400"> AI</span>
                 </h1>
-                <p className="text-xs text-gray-500">Plataforma de Inteligência Pecuária</p>
+                <p className="text-xs text-gray-500">Plataforma Pecuária</p>
               </div>
             </div>
           </div>
@@ -83,8 +78,8 @@ const Dashboard = () => {
             </button>
             <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-cyan-500/20">
               <div className="text-right">
-                <p className="text-sm font-medium">Gerenciador de Fazenda</p>
-                <p className="text-xs text-gray-500">Silver Valley Ranch</p>
+                <p className="text-sm font-medium">Gerenciador</p>
+                <p className="text-xs text-gray-500">Silver Valley</p>
               </div>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-cyan-400 flex items-center justify-center text-black font-bold text-sm">
                 GF
@@ -94,13 +89,13 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      <div className="flex pt-20 md:pt-0">
+      <div className="flex pt-16 md:pt-0">
         {/* Sidebar */}
         <motion.div
           initial={{ x: -280 }}
           animate={{ x: sidebarOpen ? 0 : -280 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed md:relative md:translate-x-0 left-0 top-20 md:top-0 bottom-0 w-64 bg-gradient-to-b from-black/90 to-slate-950/90 backdrop-blur-xl border-r border-cyan-500/20 overflow-y-auto z-40 md:z-0 md:w-72"
+          className="fixed md:relative md:translate-x-0 left-0 top-16 md:top-0 bottom-0 w-64 bg-gradient-to-b from-black/90 to-slate-950/90 backdrop-blur-xl border-r border-cyan-500/20 overflow-y-auto z-40 md:z-0"
         >
           <div className="p-4 space-y-1">
             {menuItems.map((item, index) => {
@@ -134,7 +129,7 @@ const Dashboard = () => {
             <p className="text-xs text-gray-500 mb-2 font-semibold">STATUS DO SISTEMA</p>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-2 h-2 bg-lime-400 rounded-full animate-pulse"></div>
-              <p className="text-sm text-lime-400 font-bold">Todos os Sistemas Operacionais</p>
+              <p className="text-sm text-lime-400 font-bold">Operacional</p>
             </div>
             <p className="text-xs text-gray-500">Uptime: 99.9%</p>
           </div>
@@ -152,12 +147,12 @@ const Dashboard = () => {
         )}
 
         {/* Main Content */}
-        <div className="flex-1 overflow-auto w-full md:w-auto p-4 sm:p-6 md:p-8 overflow-y-auto">
+        <div className="flex-1 overflow-auto w-full p-4 sm:p-6 md:p-8">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 max-w-7xl">
             {/* Title */}
             <div>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-2">Visão Geral do Dashboard</h2>
-              <p className="text-sm text-gray-400">Inteligência de rebanho em tempo real e desempenho da fazenda</p>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Visão Geral do Dashboard</h2>
+              <p className="text-sm text-gray-400">Inteligência de rebanho em tempo real</p>
             </div>
 
             {/* KPI Cards */}
@@ -198,24 +193,10 @@ const Dashboard = () => {
                 <h3 className="text-sm font-bold mb-4 text-lime-400 uppercase tracking-wide">Tendência de Peso</h3>
                 <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={weightData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                    <XAxis dataKey="date" stroke="#666" style={{ fontSize: '12px' }} />
-                    <YAxis stroke="#666" style={{ fontSize: '12px' }} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#000/80',
-                        border: '1px solid #00FF41',
-                        borderRadius: '8px',
-                        backdropFilter: 'blur(10px)',
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="weight"
-                      stroke="#00FF41"
-                      strokeWidth={3}
-                      dot={{ fill: '#00FF41', r: 5 }}
-                      activeDot={{ r: 7 }}
-                    />
+                    <XAxis dataKey="date" stroke="#888" />
+                    <YAxis stroke="#888" />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="weight" stroke="#00FF41" strokeWidth={2} dot={{ fill: '#00FF41' }} />
                   </LineChart>
                 </ResponsiveContainer>
               </motion.div>
@@ -230,83 +211,68 @@ const Dashboard = () => {
                 <h3 className="text-sm font-bold mb-4 text-cyan-400 uppercase tracking-wide">Status de Vacinação</h3>
                 <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
-                    <Pie data={vaccineData} cx="50%" cy="50%" innerRadius={70} outerRadius={100} dataKey="value" paddingAngle={2}>
+                    <Pie data={vaccineData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value">
                       {vaccineData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#000/80',
-                        border: '1px solid #00FF41',
-                        borderRadius: '8px',
-                        backdropFilter: 'blur(10px)',
-                      }}
-                    />
+                    <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="mt-4 space-y-2 text-xs">
-                  {vaccineData.map((item, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.fill }}></div>
-                      <span className="text-gray-400">{item.name}</span>
-                      <span className="ml-auto font-bold">{item.value}%</span>
-                    </div>
-                  ))}
-                </div>
               </motion.div>
             </div>
 
             {/* Cattle Cards */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold">Melhores Desempenhos</h3>
-                <button className="text-xs text-cyan-400 hover:text-lime-400 transition font-semibold">Ver Todos</button>
-              </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <h3 className="text-lg font-bold mb-4">Animais Principais</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {cattleList.slice(0, 4).map((cattle, i) => (
+                {cattleList.map((cattle, i) => (
                   <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    key={cattle.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 + i * 0.1 }}
-                    whileHover={{ y: -4 }}
-                    className={`p-4 rounded-lg bg-gradient-to-br from-slate-800/50 to-transparent border ${
+                    className={`p-4 rounded-lg border backdrop-blur-sm ${
                       cattle.status === 'Healthy'
-                        ? 'border-lime-500/30 hover:border-lime-500/60'
+                        ? 'bg-lime-500/5 border-lime-500/30'
                         : cattle.status === 'At Risk'
-                        ? 'border-yellow-500/30 hover:border-yellow-500/60'
-                        : 'border-red-500/30 hover:border-red-500/60'
-                    } transition backdrop-blur-sm`}
+                        ? 'bg-orange-500/5 border-orange-500/30'
+                        : 'bg-red-500/5 border-red-500/30'
+                    }`}
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-lg font-bold text-cyan-400">#{cattle.id}</span>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                          cattle.status === 'Healthy'
-                            ? 'bg-lime-500/20 text-lime-400'
-                            : cattle.status === 'At Risk'
-                            ? 'bg-yellow-500/20 text-yellow-400'
-                            : 'bg-red-500/20 text-red-400'
-                        }`}
-                      >
-                        {cattle.status === 'Healthy' ? '✓ Saudável' : cattle.status === 'At Risk' ? '⚠ Risco' : '⚠ Atenção'}
+                      <div>
+                        <p className="font-bold">{cattle.name}</p>
+                        <p className="text-xs text-gray-500">{cattle.breed}</p>
+                      </div>
+                      <span className={`text-xs font-bold px-2 py-1 rounded ${
+                        cattle.status === 'Healthy'
+                          ? 'bg-lime-500/20 text-lime-400'
+                          : cattle.status === 'At Risk'
+                          ? 'bg-orange-500/20 text-orange-400'
+                          : 'bg-red-500/20 text-red-400'
+                      }`}>
+                        {cattle.status === 'Healthy' ? '✓' : cattle.status === 'At Risk' ? '⚠' : '✕'}
                       </span>
                     </div>
-                    <h4 className="text-sm font-bold mb-1">{cattle.name}</h4>
-                    <p className="text-xs text-gray-500 mb-3">{cattle.breed}</p>
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Peso:</span>
-                        <span className="text-cyan-400 font-semibold">{cattle.weight} kg</span>
+                        <span className="font-bold">{cattle.weight} kg</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Idade:</span>
-                        <span className="text-cyan-400 font-semibold">{cattle.age} anos</span>
+                        <span className="font-bold">{cattle.age} anos</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Saúde:</span>
-                        <span className="text-lime-400 font-semibold">{cattle.health}/100</span>
+                        <span className={`font-bold ${cattle.health >= 80 ? 'text-lime-400' : cattle.health >= 60 ? 'text-orange-400' : 'text-red-400'}`}>
+                          {cattle.health}/100
+                        </span>
                       </div>
                     </div>
                   </motion.div>
