@@ -40,7 +40,7 @@ export default function Landing() {
           <div className="flex items-center gap-4">
             <a href="#beneficios" className="text-sm hover:text-accent transition">Benefícios</a>
             <a href="#planos" className="text-sm hover:text-accent transition">Planos</a>
-            <a href="#faq" className="text-sm hover:text-accent transition">FAQ</a>
+            <a href="#faq" className="text-sm hover:text-accent transition">Perguntas</a>
             <Button 
               size="sm" 
               className="bg-accent hover:bg-accent/90 text-background"
@@ -111,25 +111,23 @@ export default function Landing() {
             {...fadeInUp}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4 gradient-text">Funcionalidades Poderosas</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Tudo que você precisa para otimizar a produtividade do seu rebanho
-            </p>
+            <h2 className="text-4xl font-bold mb-4 gradient-text">Recursos Poderosos</h2>
+            <p className="text-muted-foreground">Tudo que você precisa para gerenciar seu rebanho com inteligência</p>
           </motion.div>
 
           <motion.div 
             {...staggerContainer}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
           >
             {[
               { icon: Brain, title: 'IA Avançada', desc: 'Assistente especializado em pecuária' },
-              { icon: Smartphone, title: 'App Nativo', desc: 'Experiência premium em qualquer dispositivo' },
-              { icon: Zap, title: 'Pesagem IA', desc: 'Câmera inteligente com análise 3D' },
-              { icon: TrendingUp, title: 'Previsões', desc: 'IA preditiva para otimizar ganho' },
-              { icon: BarChart3, title: 'Analytics', desc: 'Dashboards em tempo real' },
-              { icon: Shield, title: 'Seguro', desc: 'Autenticação PIN com Device ID' },
-              { icon: Check, title: 'Relatórios', desc: 'Exportação em PDF, Excel e CSV' },
-              { icon: TrendingUp, title: 'Financeiro', desc: 'Controle completo de custos' },
+              { icon: Smartphone, title: 'App Nativo', desc: 'Experiência fluida em qualquer dispositivo' },
+              { icon: TrendingUp, title: 'Análises Preditivas', desc: 'Previsões de ganho de peso e doenças' },
+              { icon: Shield, title: 'Segurança Premium', desc: 'Autenticação PIN com Device ID' },
+              { icon: BarChart3, title: 'Gráficos em Tempo Real', desc: 'Métricas e KPIs do seu rebanho' },
+              { icon: Zap, title: 'Pesagem por IA', desc: 'Câmera inteligente com HUD futurista' },
+              { icon: Check, title: 'Gestão Completa', desc: 'Cadastro, vacinação e histórico' },
+              { icon: TrendingUp, title: 'Controle Financeiro', desc: 'Custos, receitas e lucratividade' },
             ].map((feature, i) => (
               <motion.div
                 key={i}
@@ -138,66 +136,11 @@ export default function Landing() {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className="p-6 bg-background border-border hover:border-accent transition neon-glow">
+                <Card className="p-6 border-border hover:border-accent transition h-full">
                   <feature.icon className="w-8 h-8 text-accent mb-4" />
                   <h3 className="font-bold mb-2">{feature.title}</h3>
                   <p className="text-sm text-muted-foreground">{feature.desc}</p>
                 </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Dashboard Preview */}
-      <section className="py-20 px-4">
-        <div className="container">
-          <motion.div 
-            {...fadeInUp}
-            className="text-center mb-12"
-          >
-            <h2 className="text-4xl font-bold mb-4 gradient-text">Dashboard Inteligente</h2>
-            <p className="text-muted-foreground">Métricas em tempo real do seu rebanho</p>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="rounded-lg overflow-hidden neon-glow"
-          >
-            <img 
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663677906549/T2VQu6STr22DABekAsCKWM/dashboard-preview-jKAWZMgT4sE8SJ4AxmS5UQ.webp"
-              alt="Dashboard Preview"
-              className="w-full h-auto"
-            />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Estatísticas */}
-      <section className="py-20 px-4 bg-card/50">
-        <div className="container">
-          <motion.div 
-            {...staggerContainer}
-            className="grid md:grid-cols-4 gap-8 text-center"
-          >
-            {[
-              { number: '1.250+', label: 'Fazendas Conectadas' },
-              { number: '98.7%', label: 'Precisão IA' },
-              { number: '24/7', label: 'Suporte Técnico' },
-              { number: '30 dias', label: 'Trial Gratuito' },
-            ].map((stat, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <div className="text-4xl font-bold gradient-text mb-2">{stat.number}</div>
-                <p className="text-muted-foreground">{stat.label}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -212,7 +155,7 @@ export default function Landing() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4 gradient-text">Planos Simples e Transparentes</h2>
-            <p className="text-muted-foreground">30 dias gratuitos, sem cartão de crédito</p>
+            <p className="text-muted-foreground">30 dias gratuitos em todos os planos, sem cartão de crédito</p>
           </motion.div>
 
           <motion.div 
@@ -221,23 +164,23 @@ export default function Landing() {
           >
             {[
               {
-                name: 'Trial',
+                name: 'Trial Gratuito',
                 price: 'Grátis',
                 duration: '30 dias',
-                features: ['Acesso completo', 'Todas funcionalidades', 'Suporte por email']
+                features: ['Acesso completo a todas funcionalidades', 'Suporte por email', 'Até 100 animais', 'Pesagem por IA', 'Assistente IA Agro', 'Relatórios básicos']
               },
               {
-                name: 'Mensal',
-                price: 'R$ 199',
+                name: 'Plano Mensal',
+                price: 'R$ 299',
                 duration: '/mês',
-                features: ['Acesso completo', 'Suporte prioritário', 'Relatórios avançados', 'IA preditiva'],
+                features: ['Acesso completo', 'Suporte prioritário', 'Relatórios avançados', 'IA preditiva', 'Análises ilimitadas', 'Exportação de dados'],
                 highlighted: true
               },
               {
-                name: 'Anual',
-                price: 'R$ 1.990',
+                name: 'Plano Anual',
+                price: 'R$ 2.990',
                 duration: '/ano',
-                features: ['Tudo do mensal', 'Desconto 17%', 'Consultoria incluída', 'Prioridade máxima']
+                features: ['Tudo do plano mensal', 'Desconto de 17%', 'Consultoria incluída', 'Prioridade máxima', 'Suporte 24/7', 'Atualizações prioritárias']
               },
             ].map((plan, i) => (
               <motion.div
@@ -282,6 +225,21 @@ export default function Landing() {
               </motion.div>
             ))}
           </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="mt-12 text-center"
+          >
+            <p className="text-muted-foreground mb-4">
+              💳 Após os 30 dias gratuitos, escolha o plano que melhor se adequa ao seu negócio
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Métodos de pagamento: PIX e Boleto
+            </p>
+          </motion.div>
         </div>
       </section>
 
@@ -302,19 +260,27 @@ export default function Landing() {
             {[
               {
                 q: 'Preciso de cartão de crédito para o trial?',
-                a: 'Não! Os 30 dias gratuitos não requerem cartão de crédito. Você só paga após o período de trial.'
+                a: 'Não! Os 30 dias gratuitos não requerem cartão de crédito. Você só paga após o período de trial, escolhendo o plano que preferir.'
               },
               {
                 q: 'Como funciona a pesagem por IA?',
-                a: 'Basta apontar a câmera para o animal. A IA analisa altura, largura e volume corporal para estimar o peso com até 98.7% de precisão.'
+                a: 'Basta apontar a câmera para o animal. A IA analisa altura, largura e volume corporal para estimar o peso com até 98,7% de precisão.'
               },
               {
                 q: 'Posso usar em múltiplos dispositivos?',
-                a: 'Sim! Sua conta sincroniza automaticamente entre celular, tablet e desktop. Cada dispositivo tem seu próprio Device ID.'
+                a: 'Sim! Sua conta sincroniza automaticamente entre celular, tablet e desktop. Cada dispositivo tem seu próprio Device ID para segurança.'
               },
               {
                 q: 'Quais métodos de pagamento são aceitos?',
-                a: 'Aceitamos PIX e boleto para máxima conveniência.'
+                a: 'Aceitamos PIX e boleto para máxima conveniência. Ambos são processados instantaneamente ou em até 2 dias úteis.'
+              },
+              {
+                q: 'Posso cancelar minha assinatura a qualquer momento?',
+                a: 'Sim! Você pode cancelar sua assinatura a qualquer momento sem penalidades. Seus dados permanecem seguros.'
+              },
+              {
+                q: 'Qual é o suporte disponível?',
+                a: 'Oferecemos suporte por email para o plano trial, suporte prioritário para o plano mensal, e suporte 24/7 para o plano anual.'
               },
             ].map((item, i) => (
               <motion.div
@@ -352,34 +318,27 @@ export default function Landing() {
             className="bg-accent hover:bg-accent/90 text-background"
             onClick={() => window.location.href = getLoginUrl()}
           >
-            Começar Grátis Agora <ArrowRight className="ml-2 w-4 h-4" />
+            Começar Grátis por 30 Dias <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
         </motion.div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-4 bg-card/50">
+      <footer className="border-t border-border py-12 px-4">
         <div className="container">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-gradient-to-br from-accent to-secondary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">🐂</span>
-                </div>
-                <span className="font-bold gradient-text">BOVISION AI</span>
-              </div>
-              <p className="text-sm text-muted-foreground">Visão inteligente para a nova pecuária</p>
+              <h3 className="font-bold mb-4">BOVISION AI</h3>
+              <p className="text-sm text-muted-foreground">Visão Inteligente para a Nova Pecuária</p>
             </div>
-            
             <div>
               <h4 className="font-bold mb-4">Produto</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-accent transition">Funcionalidades</a></li>
-                <li><a href="#" className="hover:text-accent transition">Preços</a></li>
-                <li><a href="#" className="hover:text-accent transition">Segurança</a></li>
+                <li><a href="#" className="hover:text-accent transition">Recursos</a></li>
+                <li><a href="#planos" className="hover:text-accent transition">Planos</a></li>
+                <li><a href="#faq" className="hover:text-accent transition">Perguntas</a></li>
               </ul>
             </div>
-            
             <div>
               <h4 className="font-bold mb-4">Empresa</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
@@ -388,7 +347,6 @@ export default function Landing() {
                 <li><a href="#" className="hover:text-accent transition">Contato</a></li>
               </ul>
             </div>
-            
             <div>
               <h4 className="font-bold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
@@ -398,7 +356,6 @@ export default function Landing() {
               </ul>
             </div>
           </div>
-          
           <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
             <p>&copy; 2026 BOVISION AI. Todos os direitos reservados.</p>
           </div>
