@@ -23,6 +23,7 @@ import Alerts from "./pages/Alerts";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import { useAuth } from "./_core/hooks/useAuth";
+import NotificationContainer from "./components/NotificationContainer";
 
 function Router() {
   const { isAuthenticated } = useAuth();
@@ -71,6 +72,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
+          <NotificationContainer />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

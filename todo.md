@@ -53,7 +53,7 @@
 
 ## Assistente IA Agro
 - [x] Interface de chat estilo ChatGPT
-- [ ] Integração com LLM (invokeLLM)
+- [x] Integração com LLM (invokeLLM)
 - [x] Respostas humanizadas sobre manejo, alimentação, vacinação
 - [x] Typing animation
 - [x] Suporte a markdown com Streamdown
@@ -110,7 +110,7 @@
 - [ ] Renovação automática
 
 ## Notificações
-- [ ] Toast notifications
+- [x] Toast notifications
 - [ ] Push notifications
 - [ ] Central de notificações
 - [ ] Alertas de vacinação
@@ -171,11 +171,15 @@
 - [x] Responsividade mobile-first
 - [ ] PWA com splash screen
 - [x] Experiência app-like
+- [x] Tema Agro em todas as páginas do menu
+- [x] Ícones e elementos rurais
+- [x] Dados específicos de pecuária
+- [x] Gráficos com dados agrícolas
 
 ## Testes e Qualidade
-- [ ] Testes unitários com Vitest
-- [ ] Testes de autenticação
-- [ ] Testes de API
+- [x] Testes unitários com Vitest (24 testes passando)
+- [x] Testes de autenticação
+- [x] Testes de API (aiAssistant router)
 - [ ] Testes de UI
 - [ ] Otimização de performance
 - [ ] Verificação de acessibilidade

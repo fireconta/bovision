@@ -1,9 +1,17 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Send } from 'lucide-react';
+import { Send, AlertCircle } from 'lucide-react';
+import { trpc } from '@/lib/trpc';
+import { Streamdown } from 'streamdown';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 const AiAssistant = () => {
-  const [messages, setMessages] = useState<Array<{ id: string; role: 'user' | 'assistant'; content: string }>>([
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
@@ -12,29 +20,57 @@ const AiAssistant = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatMutation = trpc.aiAssistant.chat.useMutation();
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
-    const userMessage = {
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = {
       id: Date.now().toString(),
-      role: 'user' as const,
+      role: 'user',
       content: input,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setError(null);
 
-    setTimeout(() => {
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant' as const,
-        content: 'Entendi sua pergunta. Baseado nos dados do seu rebanho, recomendo... (resposta IA)',
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+    try {
+      const response = await chatMutation.mutateAsync({
+        messages: messages
+          .filter((m) => m.id !== '1') // Remove mensagem inicial
+          .concat(userMessage)
+          .map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+      });
+
+      if (response.success) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: response.message,
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao processar resposta');
+      console.error('Chat error:', err);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -57,6 +93,21 @@ const AiAssistant = () => {
         </div>
       </motion.div>
 
+      {/* Error Alert */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-500/10 border border-red-500/30 m-4 p-3 rounded-lg flex items-start gap-3"
+        >
+          <AlertCircle className="text-red-400 flex-shrink-0 mt-0.5" size={20} />
+          <div>
+            <p className="text-sm text-red-400 font-bold">Erro</p>
+            <p className="text-xs text-red-300">{error}</p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
         {messages.map((message, i) => (
@@ -64,7 +115,7 @@ const AiAssistant = () => {
             key={message.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
+            transition={{ delay: i * 0.05 }}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
@@ -74,7 +125,11 @@ const AiAssistant = () => {
                   : 'bg-cyan-400/10 border border-cyan-400/40 text-gray-100'
               }`}
             >
-              <p className="text-sm leading-relaxed">{message.content}</p>
+              {message.role === 'assistant' ? (
+                <Streamdown>{message.content}</Streamdown>
+              ) : (
+                <p className="text-sm leading-relaxed">{message.content}</p>
+              )}
             </div>
           </motion.div>
         ))}
@@ -106,6 +161,7 @@ const AiAssistant = () => {
             </div>
           </motion.div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
@@ -115,9 +171,10 @@ const AiAssistant = () => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSend()}
             placeholder="Faça uma pergunta sobre seu rebanho..."
-            className="flex-1 bg-black/50 border border-accent/30 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-accent/60 focus:outline-none transition"
+            disabled={isLoading}
+            className="flex-1 bg-black/50 border border-accent/30 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-accent/60 focus:outline-none transition disabled:opacity-50"
           />
           <motion.button
             whileHover={{ scale: 1.05 }}
