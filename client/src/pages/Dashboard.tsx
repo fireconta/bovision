@@ -1,24 +1,26 @@
 import { motion } from 'framer-motion';
-import { Bell, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Bell, Settings, LogOut, Menu, X, Home, BarChart3, Heart, Zap, Leaf, Users, Apple, Activity, AlertCircle, FileText, Cog } from 'lucide-react';
 import { LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const [location, setLocation] = useLocation();
+
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'cattle', label: 'Visão Geral do Rebanho', icon: '🐄' },
-    { id: 'analytics', label: 'Análises', icon: '📈' },
-    { id: 'health', label: 'Monitor de Saúde', icon: '❤️' },
-    { id: 'ai', label: 'Insights IA', icon: '🤖' },
-    { id: 'pasture', label: 'Gestão de Pastagem', icon: '🌾' },
-    { id: 'nutrition', label: 'Nutrição', icon: '🥕' },
-    { id: 'reproduction', label: 'Reprodução', icon: '👶' },
-    { id: 'movement', label: 'Movimento', icon: '🚶' },
-    { id: 'alerts', label: 'Alertas', icon: '🔔' },
-    { id: 'reports', label: 'Relatórios', icon: '📄' },
-    { id: 'settings', label: 'Configurações', icon: '⚙️' },
+    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/app' },
+    { id: 'cattle', label: 'Rebanho', icon: Users, path: '/app/rebanho' },
+    { id: 'analytics', label: 'Análises', icon: BarChart3, path: '/app/analytics' },
+    { id: 'health', label: 'Saúde', icon: Heart, path: '/app/health' },
+    { id: 'ai', label: 'IA Insights', icon: Zap, path: '/app/ai-insights' },
+    { id: 'pesagem', label: 'Pesagem IA', icon: Activity, path: '/app/pesagem' },
+    { id: 'pasture', label: 'Pastagem', icon: Leaf, path: '/app/pasture' },
+    { id: 'nutrition', label: 'Nutrição', icon: Apple, path: '/app/nutrition' },
+    { id: 'alerts', label: 'Alertas', icon: AlertCircle, path: '/app/alerts' },
+    { id: 'reports', label: 'Relatórios', icon: FileText, path: '/app/reports' },
+    { id: 'settings', label: 'Configurações', icon: Cog, path: '/app/settings' },
   ];
 
   const weightData = [
@@ -101,23 +103,31 @@ const Dashboard = () => {
           className="fixed md:relative md:translate-x-0 left-0 top-20 md:top-0 bottom-0 w-64 bg-black/80 backdrop-blur-xl border-r border-cyan-500/20 overflow-y-auto z-40 md:z-0"
         >
           <div className="p-4 space-y-1">
-            {menuItems.map((item, index) => (
-              <motion.button
-                key={item.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ x: 4 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-left text-sm font-medium ${
-                  item.id === 'dashboard'
-                    ? 'bg-lime-400/10 border-l-2 border-lime-400 text-lime-400'
-                    : 'text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/5'
-                }`}
-              >
-                <span className="text-lg">{item.icon}</span>
-                <span>{item.label}</span>
-              </motion.button>
-            ))}
+            {menuItems.map((item, index) => {
+              const IconComponent = item.icon;
+              const isActive = location === item.path;
+              return (
+                <motion.button
+                  key={item.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ x: 4 }}
+                  onClick={() => {
+                    setLocation(item.path);
+                    setSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-left text-sm font-medium ${
+                    isActive
+                      ? 'bg-lime-400/10 border-l-2 border-lime-400 text-lime-400'
+                      : 'text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/5'
+                  }`}
+                >
+                  <IconComponent size={18} />
+                  <span>{item.label}</span>
+                </motion.button>
+              );
+            })}
           </div>
 
           <div className="absolute bottom-4 left-4 right-4 p-4 bg-gradient-to-br from-lime-400/10 to-cyan-400/10 border border-cyan-500/30 rounded-lg">
