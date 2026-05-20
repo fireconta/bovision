@@ -42,12 +42,12 @@
 - [ ] Exportação de dados
 
 ## Pesagem por IA
-- [ ] Acesso à câmera do dispositivo
-- [ ] Overlay HUD futurista com linhas de detecção
-- [ ] Scanner neon em tempo real
-- [ ] Análise de altura, largura e volume corporal
-- [ ] Cálculo de peso estimado com precisão %
-- [ ] Relatório de pesagem
+- [x] Acesso à câmera do dispositivo
+- [x] Overlay HUD futurista com linhas de detecção
+- [x] Scanner neon em tempo real
+- [x] Análise de altura, largura e volume corporal
+- [x] Cálculo de peso estimado com precisão %
+- [x] Relatório de pesagem
 - [ ] Histórico de pesagens
 - [ ] Captura inteligente com estabilização visual
 
@@ -100,9 +100,9 @@
 - [ ] Evolução visual
 
 ## Sistema de Planos e Pagamento
-- [ ] Trial de 30 dias gratuitos
-- [ ] Plano mensal
-- [ ] Plano anual
+- [x] Trial de 30 dias gratuitos
+- [x] Plano mensal
+- [x] Plano anual
 - [ ] Integração com PIX
 - [ ] Integração com boleto
 - [ ] Sistema de licenciamento
@@ -180,5 +180,5 @@
 - [ ] Testes de responsividade
 
 ## Deployment
-- [ ] Checkpoint final
+- [x] Checkpoint final
 - [ ] Publicação no Manus
