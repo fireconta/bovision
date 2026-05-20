@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LogOut, Menu, X, Plus, Trash2, Lock, Unlock, Search } from 'lucide-react';
 
-export default function AdminPanel() {
+const AdminPanel = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -16,7 +16,7 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('users');
 
   const handleAdminLogin = () => {
-    if (adminPassword === 'admin') {
+    if (adminPassword === 'LVz@65245') {
       setIsAuthenticated(true);
       setAdminPassword('');
     } else {
@@ -394,4 +394,6 @@ export default function AdminPanel() {
       </div>
     </div>
   );
-}
+};
+
+export default AdminPanel;
