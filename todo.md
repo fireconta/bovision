@@ -191,9 +191,9 @@
 
 
 ## Redesenho de UI (Novo)
-- [ ] Gerar imagens de fundo com tema Agro
-- [ ] Redesenhar página /aplicativo (PIN Login) com design mobile profissional
-- [ ] Redesenhar dashboard /app com layout profissional
-- [ ] Adicionar componentes de menu e cards interativos
-- [ ] Otimizar animações e responsividade mobile
+- [x] Gerar imagens de fundo com tema Agro
+- [x] Redesenhar página /aplicativo (PIN Login) com design mobile profissional
+- [x] Redesenhar dashboard /app com layout profissional
+- [x] Adicionar componentes de menu e cards interativos
+- [x] Otimizar animações e responsividade mobile
 - [ ] Testar fluxos de navegação
