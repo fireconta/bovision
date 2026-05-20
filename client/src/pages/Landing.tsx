@@ -30,7 +30,7 @@ export default function Landing() {
             className="flex items-center gap-2"
           >
             <img 
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663677906549/T2VQu6STr22DABekAsCKWM/bovision-logo-icon-N3FvpqH9Q3jqzfuhPUHYM9.webp" 
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663677906549/T2VQu6STr22DABekAsCKWM/bovision-logo-icon-premium-6QGSXgRzQDXYBPprpsR6Qd.webp" 
               alt="BOVISION AI Logo" 
               className="w-8 h-8"
             />
