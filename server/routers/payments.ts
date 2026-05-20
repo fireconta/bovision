@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { protectedProcedure, router } from '../_core/trpc';
-import { db } from '../db';
 
 export const paymentsRouter = router({
   // Gerar QR Code PIX
