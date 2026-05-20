@@ -11,6 +11,9 @@ import HerdManagement from "./pages/HerdManagement";
 import AiAssistant from "./pages/AiAssistant";
 import AiWeighing from "./pages/AiWeighing";
 import AdminPanel from "./pages/AdminPanel";
+import WeighingHistory from "./pages/WeighingHistory";
+import VaccinationCalendar from "./pages/VaccinationCalendar";
+import FinancialControl from "./pages/FinancialControl";
 import { useAuth } from "./_core/hooks/useAuth";
 
 function Router() {
@@ -24,6 +27,9 @@ function Router() {
       <Route path={"/app/rebanho"} component={HerdManagement} />
       <Route path={"/app/assistente"} component={AiAssistant} />
       <Route path={"/app/pesagem"} component={AiWeighing} />
+      <Route path={"/app/pesagem-historico"} component={WeighingHistory} />
+      <Route path={"/app/vacinacao"} component={VaccinationCalendar} />
+      <Route path={"/app/financeiro"} component={FinancialControl} />
       <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/admin-login"} component={() => <div>Admin Login</div>} />
       <Route path={"/planos"} component={() => <Landing />} />

@@ -154,9 +154,9 @@
 - [x] Tabela admin_logs
 
 ## Armazenamento de Ficheiros
-- [ ] Upload de fotos de animais (em desenvolvimento)
-- [ ] Modal de perfil com drag-and-drop
-- [ ] Compressão e validação de imagens
+- [x] Upload de fotos de animais
+- [x] Modal de perfil com drag-and-drop
+- [x] Compressão e validação de imagens
 - [ ] Upload de imagens da câmera de pesagem
 - [ ] Armazenamento de documentos de relatórios
 - [ ] Integração com S3 via storagePut
