@@ -1,10 +1,13 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Bell } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Bell, Upload, X } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 
 const HerdManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAnimal, setSelectedAnimal] = useState<any>(null);
+  const [animalPhotos, setAnimalPhotos] = useState<Record<string, string>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: '📊' },
@@ -191,6 +194,42 @@ const HerdManagement = () => {
       animal.id.includes(searchQuery)
   );
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedAnimal) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor, selecione uma imagem válida');
+      return;
+    }
+
+    // Validar tamanho (máx 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('A imagem não pode exceder 5MB');
+      return;
+    }
+
+    // Ler arquivo e converter para base64 (para demo)
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setAnimalPhotos((prev) => ({
+        ...prev,
+        [selectedAnimal.id]: base64,
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removePhoto = (animalId: string) => {
+    setAnimalPhotos((prev) => {
+      const updated = { ...prev };
+      delete updated[animalId];
+      return updated;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -246,7 +285,7 @@ const HerdManagement = () => {
                 key={item.id}
                 whileHover={{ x: 4 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-left text-sm ${
-                  item.id === 'overview'
+                  item.id === 'herd'
                     ? 'bg-accent/10 border-l-2 border-accent text-accent'
                     : 'text-gray-400 hover:text-accent hover:bg-accent/5'
                 }`}
@@ -265,7 +304,7 @@ const HerdManagement = () => {
         </motion.div>
 
         {/* Content */}
-        <div className="flex-1 md:ml-56 p-4 sm:p-6">
+        <div className="flex-1 md:ml-56 p-4 sm:p-6 pb-20">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             {/* Title */}
             <div>
@@ -307,7 +346,8 @@ const HerdManagement = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.05 }}
-                  className={`p-4 border-2 rounded-lg bg-black/50 hover:border-accent/80 transition ${getStatusColor(animal.status)}`}
+                  onClick={() => setSelectedAnimal(animal)}
+                  className={`p-4 border-2 rounded-lg bg-black/50 hover:border-accent/80 transition cursor-pointer ${getStatusColor(animal.status)}`}
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between mb-3">
@@ -322,8 +362,12 @@ const HerdManagement = () => {
                   </div>
 
                   {/* Image */}
-                  <div className="w-full h-32 bg-gradient-to-br from-accent/10 to-cyan-400/10 rounded-lg mb-3 flex items-center justify-center text-5xl">
-                    🐄
+                  <div className="w-full h-32 bg-gradient-to-br from-accent/10 to-cyan-400/10 rounded-lg mb-3 flex items-center justify-center text-5xl overflow-hidden">
+                    {animalPhotos[animal.id] ? (
+                      <img src={animalPhotos[animal.id]} alt={animal.name} className="w-full h-full object-cover" />
+                    ) : (
+                      '🐄'
+                    )}
                   </div>
 
                   {/* Info */}
@@ -369,6 +413,134 @@ const HerdManagement = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Animal Profile Modal */}
+      <AnimatePresence>
+        {selectedAnimal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedAnimal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-black border-2 border-accent/40 rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-accent">{selectedAnimal.name}</h3>
+                <button
+                  onClick={() => setSelectedAnimal(null)}
+                  className="p-1 hover:bg-accent/10 rounded-lg transition"
+                >
+                  <X size={20} className="text-gray-400" />
+                </button>
+              </div>
+
+              {/* Photo Section */}
+              <div className="mb-6">
+                <p className="text-sm text-gray-400 mb-3">Foto do Animal</p>
+                <div className="relative">
+                  <div className="w-full h-48 bg-gradient-to-br from-accent/10 to-cyan-400/10 rounded-lg flex items-center justify-center text-6xl overflow-hidden border-2 border-dashed border-accent/30 hover:border-accent/60 transition">
+                    {animalPhotos[selectedAnimal.id] ? (
+                      <img src={animalPhotos[selectedAnimal.id]} alt={selectedAnimal.name} className="w-full h-full object-cover" />
+                    ) : (
+                      '🐄'
+                    )}
+                  </div>
+
+                  {/* Upload Button */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-2 right-2 p-2 bg-accent text-black rounded-lg hover:shadow-lg hover:shadow-accent/50 transition"
+                  >
+                    <Upload size={20} />
+                  </motion.button>
+                </div>
+
+                {/* Remove Photo Button */}
+                {animalPhotos[selectedAnimal.id] && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => removePhoto(selectedAnimal.id)}
+                    className="w-full mt-2 py-2 bg-red-500/20 border border-red-500/40 text-red-400 rounded-lg hover:bg-red-500/30 transition text-sm"
+                  >
+                    Remover Foto
+                  </motion.button>
+                )}
+              </div>
+
+              {/* Animal Details */}
+              <div className="space-y-3 mb-6">
+                <div className="p-3 bg-black/50 border border-accent/30 rounded-lg">
+                  <p className="text-xs text-gray-400 mb-1">ID</p>
+                  <p className="text-sm font-bold text-accent">{selectedAnimal.id}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-black/50 border border-accent/30 rounded-lg">
+                    <p className="text-xs text-gray-400 mb-1">Raça</p>
+                    <p className="text-sm font-bold text-accent">{selectedAnimal.breed}</p>
+                  </div>
+                  <div className="p-3 bg-black/50 border border-accent/30 rounded-lg">
+                    <p className="text-xs text-gray-400 mb-1">Idade</p>
+                    <p className="text-sm font-bold text-accent">{selectedAnimal.age} anos</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-black/50 border border-accent/30 rounded-lg">
+                    <p className="text-xs text-gray-400 mb-1">Peso</p>
+                    <p className="text-sm font-bold text-accent">{selectedAnimal.weight} kg</p>
+                  </div>
+                  <div className="p-3 bg-black/50 border border-accent/30 rounded-lg">
+                    <p className="text-xs text-gray-400 mb-1">Score Saúde</p>
+                    <p className="text-sm font-bold text-accent">{selectedAnimal.healthScore}/100</p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-black/50 border border-accent/30 rounded-lg">
+                  <p className="text-xs text-gray-400 mb-1">Vacinação</p>
+                  <p className={`text-sm font-bold ${getVaccinationColor(selectedAnimal.vaccination)}`}>
+                    {selectedAnimal.vaccination}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-black/50 border border-accent/30 rounded-lg">
+                  <p className="text-xs text-gray-400 mb-1">Status</p>
+                  <p className="text-sm font-bold text-accent">{selectedAnimal.status}</p>
+                </div>
+              </div>
+
+              {/* Close Button */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedAnimal(null)}
+                className="w-full py-3 bg-gradient-to-r from-accent to-cyan-400 text-black font-bold rounded-lg hover:shadow-lg hover:shadow-accent/50 transition"
+              >
+                Fechar
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
