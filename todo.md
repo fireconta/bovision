@@ -103,8 +103,8 @@
 - [x] Trial de 30 dias gratuitos
 - [x] Plano mensal
 - [x] Plano anual
-- [ ] Integração com PIX
-- [ ] Integração com boleto
+- [x] Integração com PIX (QR Code)
+- [x] Integração com boleto
 - [ ] Sistema de licenciamento
 - [ ] Verificação de expiração
 - [ ] Renovação automática

@@ -22,6 +22,7 @@ import Nutrition from "./pages/Nutrition";
 import Alerts from "./pages/Alerts";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import PlansPayment from "./pages/PlansPayment";
 import { useAuth } from "./_core/hooks/useAuth";
 import NotificationContainer from "./components/NotificationContainer";
 
@@ -45,9 +46,10 @@ function Router() {
       <Route path={"/app/pasture"} component={Pasture} />
       <Route path={"/app/nutrition"} component={Nutrition} />
       <Route path={"/app/alerts"} component={Alerts} />
-      <Route path={"/app/reports"} component={Reports} />
-      <Route path={"/app/settings"} component={Settings} />
-      <Route path={"/admin"} component={AdminPanel} />
+      <Route path={"app/reports"} component={Reports} />
+      <Route path={"app/settings"} component={Settings} />
+      <Route path={"app/planos"} component={PlansPayment} />
+      <Route path={"admin"} component={AdminPanel} />
       <Route path={"/admin-login"} component={() => <div>Admin Login</div>} />
       <Route path={"/planos"} component={() => <Landing />} />
       <Route path={"/suporte"} component={() => <div>Suporte</div>} />
