@@ -94,13 +94,13 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      <div className="flex pt-20">
+      <div className="flex pt-20 md:pt-0">
         {/* Sidebar */}
         <motion.div
           initial={{ x: -280 }}
           animate={{ x: sidebarOpen ? 0 : -280 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed md:relative md:translate-x-0 left-0 top-20 md:top-0 bottom-0 w-64 bg-black/80 backdrop-blur-xl border-r border-cyan-500/20 overflow-y-auto z-40 md:z-0"
+          className="fixed md:relative md:translate-x-0 left-0 top-20 md:top-0 bottom-0 w-64 bg-gradient-to-b from-black/90 to-slate-950/90 backdrop-blur-xl border-r border-cyan-500/20 overflow-y-auto z-40 md:z-0 md:w-72"
         >
           <div className="p-4 space-y-1">
             {menuItems.map((item, index) => {
@@ -145,13 +145,14 @@ const Dashboard = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={() => setSidebarOpen(false)}
             className="fixed inset-0 bg-black/50 z-30 md:hidden"
           />
         )}
 
-        {/* Content */}
-        <div className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto">
+        {/* Main Content */}
+        <div className="flex-1 overflow-auto w-full md:w-auto p-4 sm:p-6 md:p-8 overflow-y-auto">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 max-w-7xl">
             {/* Title */}
             <div>
