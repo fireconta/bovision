@@ -240,3 +240,32 @@ export const adminLogs = mysqlTable("admin_logs", {
 
 export type AdminLog = typeof adminLogs.$inferSelect;
 export type InsertAdminLog = typeof adminLogs.$inferInsert;
+
+
+// AI Conversations
+export const conversations = mysqlTable("conversations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  title: varchar("title", { length: 256 }),
+  summary: text("summary"),
+  messageCount: int("messageCount").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Conversation = typeof conversations.$inferSelect;
+export type InsertConversation = typeof conversations.$inferInsert;
+
+// Conversation Messages
+export const conversationMessages = mysqlTable("conversation_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  conversationId: int("conversationId").notNull(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["user", "assistant"]).notNull(),
+  content: longtext("content").notNull(),
+  metadata: longtext("metadata"), // JSON metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ConversationMessage = typeof conversationMessages.$inferSelect;
+export type InsertConversationMessage = typeof conversationMessages.$inferInsert;

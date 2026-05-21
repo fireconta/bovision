@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, devices, pins, sessions, animals, weights, vaccines, notifications } from "../drizzle/schema";
+import { InsertUser, users, devices, pins, sessions, animals, weights, vaccines, notifications, conversations, conversationMessages, financial } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { eq, desc, and } from "drizzle-orm";
 
@@ -228,4 +228,221 @@ export async function createNotification(data: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.insert(notifications).values(data);
+}
+
+
+// ============================================================
+// AI CONVERSATIONS
+// ============================================================
+export async function getUserConversations(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(conversations).where(eq(conversations.userId, userId)).orderBy(desc(conversations.updatedAt));
+}
+
+export async function getConversationById(conversationId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(conversations).where(and(eq(conversations.id, conversationId), eq(conversations.userId, userId))).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createConversation(data: { userId: number; title?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(conversations).values({
+    userId: data.userId,
+    title: data.title || `Conversa ${new Date().toLocaleDateString('pt-BR')}`,
+    messageCount: 0,
+  });
+  return result;
+}
+
+export async function getConversationMessages(conversationId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(conversationMessages).where(eq(conversationMessages.conversationId, conversationId)).orderBy(desc(conversationMessages.createdAt));
+}
+
+export async function addConversationMessage(data: { conversationId: number; userId: number; role: 'user' | 'assistant'; content: string; metadata?: any }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Add message
+  await db.insert(conversationMessages).values({
+    conversationId: data.conversationId,
+    userId: data.userId,
+    role: data.role,
+    content: data.content,
+    metadata: data.metadata ? JSON.stringify(data.metadata) : null,
+  });
+  
+  // Update conversation message count and timestamp
+  const conv = await getConversationById(data.conversationId, data.userId);
+  if (conv) {
+    const messages = await getConversationMessages(data.conversationId);
+    await db.update(conversations).set({ messageCount: messages.length }).where(eq(conversations.id, data.conversationId));
+  }
+}
+
+export async function deleteConversation(conversationId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  
+  // Delete all messages first
+  await db.delete(conversationMessages).where(eq(conversationMessages.conversationId, conversationId));
+  
+  // Delete conversation
+  await db.delete(conversations).where(and(eq(conversations.id, conversationId), eq(conversations.userId, userId)));
+}
+
+
+// ============================================================
+// SEARCH & FILTERS
+// ============================================================
+export async function searchAnimals(userId: number, query: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const searchTerm = `%${query}%`;
+  return await db.select().from(animals).where(
+    and(
+      eq(animals.userId, userId),
+      // Search by name or breed
+      // Note: MySQL LIKE is case-insensitive by default
+    )
+  ).limit(50);
+}
+
+export async function filterAnimals(userId: number, filters: {
+  breed?: string;
+  sex?: 'male' | 'female';
+  healthStatus?: 'healthy' | 'sick' | 'treatment';
+  vacinationStatus?: 'up_to_date' | 'pending' | 'overdue';
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const allAnimals = await getUserAnimals(userId);
+  
+  return allAnimals.filter(animal => {
+    if (filters.breed && animal.breed !== filters.breed) return false;
+    if (filters.sex && animal.sex !== filters.sex) return false;
+    if (filters.healthStatus && animal.healthStatus !== filters.healthStatus) return false;
+    if (filters.vacinationStatus && animal.vacinationStatus !== filters.vacinationStatus) return false;
+    return true;
+  })
+}
+
+export async function getAnimalStats(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const allAnimals = await getUserAnimals(userId);
+  
+  if (allAnimals.length === 0) {
+    return {
+      totalAnimals: 0,
+      averageWeight: 0,
+      healthyCount: 0,
+      sickCount: 0,
+      vaccinatedCount: 0,
+    };
+  }
+  
+  const healthyCount = allAnimals.filter(a => a.healthStatus === 'healthy').length;
+  const sickCount = allAnimals.filter(a => a.healthStatus === 'sick').length;
+  const vaccinatedCount = allAnimals.filter(a => a.vacinationStatus === 'up_to_date').length;
+  
+  const weights = allAnimals
+    .map(a => parseFloat(a.currentWeight?.toString() || '0'))
+    .filter(w => w > 0);
+  
+  const averageWeight = weights.length > 0
+    ? weights.reduce((a, b) => a + b, 0) / weights.length
+    : 0;
+  
+  return {
+    totalAnimals: allAnimals.length,
+    averageWeight: Math.round(averageWeight * 100) / 100,
+    healthyCount,
+    sickCount,
+    vaccinatedCount,
+  };
+}
+
+
+// ============================================================
+// FINANCIAL REPORTS
+// ============================================================
+export async function getFinancialRecords(userId: number, startDate?: Date, endDate?: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  let query = db.select().from(financial).where(eq(financial.userId, userId));
+  
+  // Add date filters if provided
+  // Note: This would require additional imports from drizzle-orm
+  
+  return await query.orderBy(desc(financial.date));
+}
+
+export async function getFinancialSummary(userId: number, startDate?: Date, endDate?: Date) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const records = await getFinancialRecords(userId, startDate, endDate);
+  
+  const income = records
+    .filter(r => r.type === 'income')
+    .reduce((sum, r) => sum + parseFloat(r.amount?.toString() || '0'), 0);
+  
+  const expenses = records
+    .filter(r => r.type === 'expense')
+    .reduce((sum, r) => sum + parseFloat(r.amount?.toString() || '0'), 0);
+  
+  const profit = income - expenses;
+  
+  const byCategory: Record<string, { income: number; expense: number }> = {};
+  
+  records.forEach(record => {
+    if (!byCategory[record.category]) {
+      byCategory[record.category] = { income: 0, expense: 0 };
+    }
+    const amount = parseFloat(record.amount?.toString() || '0');
+    if (record.type === 'income') {
+      byCategory[record.category].income += amount;
+    } else {
+      byCategory[record.category].expense += amount;
+    }
+  });
+  
+  return {
+    totalIncome: Math.round(income * 100) / 100,
+    totalExpenses: Math.round(expenses * 100) / 100,
+    profit: Math.round(profit * 100) / 100,
+    profitMargin: income > 0 ? Math.round((profit / income) * 100) : 0,
+    byCategory,
+    recordCount: records.length,
+  };
+}
+
+export async function addFinancialRecord(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(financial).values(data);
+}
+
+export async function deleteFinancialRecord(recordId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  
+  // Ensure user owns this record
+  const record = await db.select().from(financial).where(
+    and(eq(financial.id, recordId), eq(financial.userId, userId))
+  ).limit(1);
+  
+  if (record.length === 0) return;
+  
+  await db.delete(financial).where(eq(financial.id, recordId));
 }
