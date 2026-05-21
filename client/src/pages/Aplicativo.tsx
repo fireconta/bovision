@@ -2,7 +2,7 @@
 
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Smartphone, Lock, Shield, AlertTriangle, Eye, EyeOff, Check, X } from "lucide-react";
+import { Smartphone, Lock, Shield, AlertTriangle, Eye, EyeOff, Check, X, Zap } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
 // ============================================================
@@ -20,20 +20,16 @@ function validatePinSecurity(pin: string): { valid: boolean; reason?: string } {
 
   const digits = pin.split("").map(Number);
 
-  // Rule 1: All same digit
   if (digits.every(d => d === digits[0])) {
     return { valid: false, reason: "PIN muito fraco: não use todos os dígitos iguais (ex: 111111)." };
   }
 
-  // Rule 2: Sequential ascending
   const isAscSeq = digits.every((d, i) => i === 0 || d === digits[i - 1]! + 1);
   if (isAscSeq) return { valid: false, reason: "PIN muito fraco: não use sequências crescentes (ex: 123456)." };
 
-  // Rule 3: Sequential descending
   const isDescSeq = digits.every((d, i) => i === 0 || d === digits[i - 1]! - 1);
   if (isDescSeq) return { valid: false, reason: "PIN muito fraco: não use sequências decrescentes (ex: 654321)." };
 
-  // Rule 4: Pairs of repeated digits
   const isPairs = digits.every((d, i) => {
     const pairIdx = Math.floor(i / 2);
     return d === digits[pairIdx * 2];
@@ -42,7 +38,6 @@ function validatePinSecurity(pin: string): { valid: boolean; reason?: string } {
     return { valid: false, reason: "PIN muito fraco: não use pares repetidos (ex: 112233)." };
   }
 
-  // Rule 5: Alternating pairs
   let repeatBlockCount = 0;
   for (let i = 0; i < digits.length - 1; i++) {
     if (digits[i] === digits[i + 1]) repeatBlockCount++;
@@ -51,20 +46,17 @@ function validatePinSecurity(pin: string): { valid: boolean; reason?: string } {
     return { valid: false, reason: "PIN muito fraco: muitos dígitos repetidos consecutivos." };
   }
 
-  // Rule 6: Known weak PINs
   const knownWeak = ["123456", "654321", "112233", "332211", "445566", "665544", "778899", "998877", "121212", "010101", "000000", "999999", "123123", "456456", "789789"];
   if (knownWeak.includes(pin)) {
     return { valid: false, reason: "Este PIN é muito comum e não é permitido por segurança." };
   }
 
-  // Rule 7: Max 3 consecutive same digits
   for (let i = 0; i < digits.length - 2; i++) {
     if (digits[i] === digits[i + 1] && digits[i + 1] === digits[i + 2]) {
       return { valid: false, reason: "PIN fraco: não use 3 ou mais dígitos iguais seguidos (ex: 111, 222)." };
     }
   }
 
-  // Rule 8: Max 4 of the same digit in total
   const freq: Record<number, number> = {};
   for (const d of digits) freq[d] = (freq[d] || 0) + 1;
   if (Math.max(...Object.values(freq)) >= 4) {
@@ -99,6 +91,7 @@ export default function Aplicativo() {
   const [error, setError] = useState<string | null>(null);
   const [showPin, setShowPin] = useState(false);
   const [deviceId] = useState(() => getOrCreateDeviceId());
+  const [clickedButton, setClickedButton] = useState<string | null>(null);
 
   // Check if user has PIN on mount
   useEffect(() => {
@@ -147,7 +140,6 @@ export default function Aplicativo() {
       const storedPin = localStorage.getItem(PIN_KEY);
       if (pin === storedPin) {
         setLoading(true);
-        // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 500));
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + 8);
@@ -202,171 +194,292 @@ export default function Aplicativo() {
   const currentPin = mode === "confirm" ? confirmPin : pin;
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative">
-      {/* Animated background orbs */}
+    <div className="min-h-screen w-full overflow-hidden bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-950 relative">
+      {/* Animated background elements */}
       <motion.div
-        className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 rounded-full blur-3xl"
-        animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
-        transition={{ duration: 15, repeat: Infinity }}
+        className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-emerald-500/30 to-cyan-500/20 rounded-full blur-3xl"
+        animate={{ x: [0, 100, 0], y: [0, 50, 0] }}
+        transition={{ duration: 20, repeat: Infinity }}
       />
       <motion.div
-        className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 rounded-full blur-3xl"
-        animate={{ x: [0, -50, 0], y: [0, -30, 0] }}
-        transition={{ duration: 18, repeat: Infinity }}
+        className="absolute top-1/2 right-0 w-96 h-96 bg-gradient-to-br from-cyan-500/30 to-emerald-500/20 rounded-full blur-3xl"
+        animate={{ x: [0, -100, 0], y: [0, -50, 0] }}
+        transition={{ duration: 25, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute bottom-0 left-1/3 w-96 h-96 bg-gradient-to-br from-emerald-600/20 to-cyan-600/20 rounded-full blur-3xl"
+        animate={{ x: [0, 50, 0], y: [0, -100, 0] }}
+        transition={{ duration: 30, repeat: Infinity }}
       />
 
-      {/* Grid background */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,136,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,136,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
+      {/* Grid background with animation */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,136,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,136,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
+
+      {/* Animated particles */}
+      {[...Array(5)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-emerald-400 rounded-full"
+          animate={{
+            x: [Math.random() * 100, Math.random() * 100],
+            y: [Math.random() * 100, Math.random() * 100],
+            opacity: [0, 1, 0],
+          }}
+          transition={{
+            duration: 10 + i * 2,
+            repeat: Infinity,
+            delay: i * 2,
+          }}
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}
+        />
+      ))}
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8, type: "spring" }}
           className="w-full max-w-md"
         >
-          {/* Header */}
+          {/* Header with animated logo */}
           <div className="text-center mb-12">
             <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="text-6xl mb-4"
+              animate={{ 
+                rotate: [0, 10, -10, 0],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="text-7xl mb-6 drop-shadow-2xl"
             >
               🐄
             </motion.div>
-            <h1 className="text-4xl font-black bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent mb-2">
+            
+            <motion.h1 
+              className="text-5xl font-black bg-gradient-to-r from-emerald-300 via-cyan-300 to-emerald-300 bg-clip-text text-transparent mb-3 tracking-wider"
+              animate={{ 
+                textShadow: [
+                  "0 0 20px rgba(0,255,136,0.5)",
+                  "0 0 40px rgba(0,255,136,0.8)",
+                  "0 0 20px rgba(0,255,136,0.5)",
+                ]
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
               BOVISION
-            </h1>
-            <p className="text-cyan-400/80 text-sm tracking-widest">VISÃO INTELIGENTE PARA A NOVA PECUÁRIA</p>
+            </motion.h1>
+
+            <motion.div
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-emerald-400/80 text-xs tracking-[0.3em] font-semibold"
+            >
+              VISÃO INTELIGENTE
+            </motion.div>
           </div>
 
-          {/* Main card */}
+          {/* Main card with glow effect */}
           <motion.div
-            className="backdrop-blur-xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 border border-emerald-500/20 rounded-2xl p-8 shadow-2xl"
-            animate={{ boxShadow: ["0 0 20px rgba(0,255,136,0.1)", "0 0 40px rgba(0,255,136,0.2)", "0 0 20px rgba(0,255,136,0.1)"] }}
-            transition={{ duration: 3, repeat: Infinity }}
+            className="relative backdrop-blur-2xl bg-gradient-to-br from-slate-800/60 via-slate-900/50 to-slate-900/60 border-2 border-emerald-500/40 rounded-3xl p-10 shadow-2xl overflow-hidden"
+            animate={{ 
+              boxShadow: [
+                "0 0 30px rgba(0,255,136,0.1), inset 0 0 30px rgba(0,255,136,0.05)",
+                "0 0 60px rgba(0,255,136,0.3), inset 0 0 60px rgba(0,255,136,0.1)",
+                "0 0 30px rgba(0,255,136,0.1), inset 0 0 30px rgba(0,255,136,0.05)",
+              ]
+            }}
+            transition={{ duration: 4, repeat: Infinity }}
           >
-            {/* Status badge */}
-            <div className="flex items-center justify-center gap-2 mb-8 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full w-fit mx-auto">
-              <Shield className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-semibold text-emerald-400">ACESSO SEGURO</span>
-            </div>
+            {/* Inner glow */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-cyan-500/5 rounded-3xl"
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
 
-            {/* Title */}
-            <h2 className="text-center text-xl font-bold text-white mb-2">
-              {mode === "entry" ? "Bem-vindo de Volta" : mode === "create" ? "Criar PIN de Segurança" : "Confirmar PIN"}
-            </h2>
-            <p className="text-center text-sm text-slate-400 mb-8">
-              {mode === "entry" 
-                ? "Digite seu PIN para acessar" 
-                : mode === "create" 
-                ? "Crie um PIN seguro com 6 dígitos" 
-                : "Confirme seu PIN"}
-            </p>
-
-            {/* PIN dots */}
-            <div className="flex gap-3 justify-center mb-10">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <motion.div
-                  key={i}
-                  animate={{
-                    scale: currentPin.length > i ? [1, 1.2, 1] : 1,
-                    backgroundColor: currentPin.length > i ? "#00ff88" : "rgba(0, 255, 136, 0.1)",
-                    boxShadow: currentPin.length > i ? "0 0 20px rgba(0,255,136,0.6)" : "none",
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="w-12 h-12 rounded-full border-2 border-emerald-500/40"
-                />
-              ))}
-            </div>
-
-            {/* Error message */}
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex gap-2 items-start"
+            {/* Content inside card */}
+            <div className="relative z-10">
+              {/* Status badge with animation */}
+              <motion.div 
+                className="flex items-center justify-center gap-2 mb-8 px-4 py-3 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/50 rounded-full w-fit mx-auto"
+                animate={{ 
+                  borderColor: [
+                    "rgba(0,255,136,0.5)",
+                    "rgba(0,255,136,1)",
+                    "rgba(0,255,136,0.5)",
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
               >
-                <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-red-400">{error}</p>
+                <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 2, repeat: Infinity }}>
+                  <Zap className="w-4 h-4 text-emerald-400" />
+                </motion.div>
+                <span className="text-xs font-bold text-emerald-300">ACESSO SEGURO</span>
               </motion.div>
-            )}
 
-            {/* Numeric keypad */}
-            <div className="grid grid-cols-3 gap-3 mb-8">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                <motion.button
-                  key={num}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handlePinEntry(num.toString())}
-                  disabled={currentPin.length >= 6}
-                  className="h-14 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/40 text-white font-bold text-lg hover:from-emerald-500/30 hover:to-cyan-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              {/* Title */}
+              <h2 className="text-center text-2xl font-black text-white mb-2">
+                {mode === "entry" ? "Bem-vindo de Volta" : mode === "create" ? "Criar PIN Seguro" : "Confirmar PIN"}
+              </h2>
+              <p className="text-center text-sm text-emerald-200/70 mb-10">
+                {mode === "entry" 
+                  ? "Digite seu PIN de 6 dígitos" 
+                  : mode === "create" 
+                  ? "Crie um PIN seguro e memorável" 
+                  : "Confirme seu PIN"}
+              </p>
+
+              {/* PIN dots with enhanced animation */}
+              <div className="flex gap-4 justify-center mb-12">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    animate={{
+                      scale: currentPin.length > i ? [1, 1.3, 1] : 1,
+                      backgroundColor: currentPin.length > i ? "#00ff88" : "rgba(0, 255, 136, 0.1)",
+                      boxShadow: currentPin.length > i 
+                        ? ["0 0 10px rgba(0,255,136,0.5)", "0 0 30px rgba(0,255,136,0.8)", "0 0 10px rgba(0,255,136,0.5)"]
+                        : "0 0 0px rgba(0,255,136,0)",
+                    }}
+                    transition={{ duration: 0.4 }}
+                    className="w-14 h-14 rounded-full border-2 border-emerald-500/60 backdrop-blur-sm"
+                  />
+                ))}
+              </div>
+
+              {/* Error message with animation */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.8 }}
+                  className="mb-8 p-4 bg-gradient-to-r from-red-500/20 to-red-600/10 border-2 border-red-500/50 rounded-xl flex gap-3 items-start"
                 >
-                  {num}
-                </motion.button>
-              ))}
-            </div>
-
-            {/* 0 and action buttons */}
-            <div className="grid grid-cols-3 gap-3 mb-8">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handlePinEntry("0")}
-                disabled={currentPin.length >= 6}
-                className="h-14 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/40 text-white font-bold text-lg hover:from-emerald-500/30 hover:to-cyan-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed col-span-1"
-              >
-                0
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowPin(!showPin)}
-                className="h-14 rounded-lg bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-slate-600/40 text-slate-300 hover:from-slate-700/60 hover:to-slate-800/60 transition-all flex items-center justify-center"
-              >
-                {showPin ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleBackspace}
-                className="h-14 rounded-lg bg-gradient-to-br from-red-500/20 to-red-600/20 border border-red-500/40 text-red-400 hover:from-red-500/30 hover:to-red-600/30 transition-all flex items-center justify-center"
-              >
-                <X className="w-5 h-5" />
-              </motion.button>
-            </div>
-
-            {/* Submit button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleSubmit}
-              disabled={currentPin.length !== 6 || loading}
-              className="w-full h-14 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold text-lg hover:from-emerald-600 hover:to-cyan-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
-            >
-              {loading ? (
-                <>
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }}>
-                    <Smartphone className="w-5 h-5" />
-                  </motion.div>
-                  Processando...
-                </>
-              ) : (
-                <>
-                  <Check className="w-5 h-5" />
-                  {mode === "entry" ? "Entrar" : mode === "create" ? "Próximo" : "Confirmar"}
-                </>
+                  <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-red-300">{error}</p>
+                </motion.div>
               )}
-            </motion.button>
 
-            {/* Device info */}
-            <div className="mt-8 pt-6 border-t border-slate-700/50 text-center">
-              <p className="text-xs text-slate-500 mb-2">Device ID</p>
-              <p className="text-xs font-mono text-emerald-400/60">{deviceId}</p>
+              {/* Numeric keypad - 3x4 grid with 0 in the middle */}
+              <div className="grid grid-cols-3 gap-3 mb-8">
+                {/* Row 1: 1-3 */}
+                {[1, 2, 3].map((num) => (
+                  <motion.button
+                    key={num}
+                    whileHover={{ scale: 1.08, y: -2 }}
+                    whileTap={{ scale: 0.92 }}
+                    onMouseDown={() => setClickedButton(num.toString())}
+                    onMouseUp={() => setClickedButton(null)}
+                    onClick={() => handlePinEntry(num.toString())}
+                    disabled={currentPin.length >= 6}
+                    className="h-16 rounded-xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/20 border-2 border-emerald-500/50 text-white font-bold text-xl hover:from-emerald-500/50 hover:to-cyan-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/50"
+                  >
+                    {num}
+                  </motion.button>
+                ))}
+
+                {/* Row 2: 4-6 */}
+                {[4, 5, 6].map((num) => (
+                  <motion.button
+                    key={num}
+                    whileHover={{ scale: 1.08, y: -2 }}
+                    whileTap={{ scale: 0.92 }}
+                    onMouseDown={() => setClickedButton(num.toString())}
+                    onMouseUp={() => setClickedButton(null)}
+                    onClick={() => handlePinEntry(num.toString())}
+                    disabled={currentPin.length >= 6}
+                    className="h-16 rounded-xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/20 border-2 border-emerald-500/50 text-white font-bold text-xl hover:from-emerald-500/50 hover:to-cyan-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/50"
+                  >
+                    {num}
+                  </motion.button>
+                ))}
+
+                {/* Row 3: 7-9 */}
+                {[7, 8, 9].map((num) => (
+                  <motion.button
+                    key={num}
+                    whileHover={{ scale: 1.08, y: -2 }}
+                    whileTap={{ scale: 0.92 }}
+                    onMouseDown={() => setClickedButton(num.toString())}
+                    onMouseUp={() => setClickedButton(null)}
+                    onClick={() => handlePinEntry(num.toString())}
+                    disabled={currentPin.length >= 6}
+                    className="h-16 rounded-xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/20 border-2 border-emerald-500/50 text-white font-bold text-xl hover:from-emerald-500/50 hover:to-cyan-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/50"
+                  >
+                    {num}
+                  </motion.button>
+                ))}
+
+                {/* Row 4: 0 (center), Eye toggle, Delete */}
+                <motion.button
+                  whileHover={{ scale: 1.08, y: -2 }}
+                  whileTap={{ scale: 0.92 }}
+                  onClick={() => handlePinEntry("0")}
+                  disabled={currentPin.length >= 6}
+                  className="h-16 rounded-xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/20 border-2 border-emerald-500/50 text-white font-bold text-2xl hover:from-emerald-500/50 hover:to-cyan-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/50"
+                >
+                  0
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.08, y: -2 }}
+                  whileTap={{ scale: 0.92 }}
+                  onClick={() => setShowPin(!showPin)}
+                  className="h-16 rounded-xl bg-gradient-to-br from-slate-700/40 to-slate-800/40 border-2 border-slate-600/50 text-slate-300 hover:from-slate-700/60 hover:to-slate-800/60 transition-all flex items-center justify-center shadow-lg"
+                >
+                  {showPin ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.08, y: -2 }}
+                  whileTap={{ scale: 0.92 }}
+                  onClick={handleBackspace}
+                  className="h-16 rounded-xl bg-gradient-to-br from-red-500/30 to-red-600/20 border-2 border-red-500/50 text-red-400 hover:from-red-500/50 hover:to-red-600/30 transition-all flex items-center justify-center shadow-lg hover:shadow-red-500/50"
+                >
+                  <X className="w-6 h-6" />
+                </motion.button>
+              </div>
+
+              {/* Submit button with enhanced animation */}
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSubmit}
+                disabled={currentPin.length !== 6 || loading}
+                className="w-full h-16 rounded-xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 text-white font-bold text-lg hover:from-emerald-600 hover:via-cyan-600 hover:to-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-2xl hover:shadow-emerald-500/50 relative overflow-hidden"
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-emerald-400/0 via-white/20 to-emerald-400/0"
+                  animate={{ x: ["-100%", "100%"] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                {loading ? (
+                  <>
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }}>
+                      <Smartphone className="w-6 h-6" />
+                    </motion.div>
+                    <span>Processando...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-6 h-6" />
+                    <span>{mode === "entry" ? "Entrar" : mode === "create" ? "Próximo" : "Confirmar"}</span>
+                  </>
+                )}
+              </motion.button>
+
+              {/* Device info with glow */}
+              <motion.div 
+                className="mt-10 pt-8 border-t border-emerald-500/20 text-center"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                <p className="text-xs text-emerald-400/60 mb-2">Device ID</p>
+                <p className="text-xs font-mono text-emerald-300 bg-emerald-500/10 px-3 py-2 rounded-lg inline-block border border-emerald-500/20">{deviceId}</p>
+              </motion.div>
             </div>
           </motion.div>
 
@@ -374,10 +487,10 @@ export default function Aplicativo() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="text-center mt-8 text-xs text-slate-500"
+            transition={{ delay: 1 }}
+            className="text-center mt-10 text-xs text-emerald-400/50"
           >
-            <p>Plataforma AgroTech com IA avançada</p>
+            <p>Plataforma AgroTech com IA Avançada</p>
             <p className="mt-1">© 2026 BOVISION AI. Todos os direitos reservados.</p>
           </motion.div>
         </motion.div>
