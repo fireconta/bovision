@@ -1,6 +1,8 @@
-import { motion, AnimatePresence } from "framer-motion";
+'use client';
+
 import { useLocation } from "wouter";
-import { Delete, Loader2, ShieldCheck, AlertTriangle, Lock, Smartphone, Eye, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
+import { Smartphone, Lock, Shield, AlertTriangle, Eye, EyeOff, Check, X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
 // ============================================================
@@ -86,413 +88,300 @@ function getOrCreateDeviceId(): string {
 }
 
 // ============================================================
-// SUB-COMPONENTS
-// ============================================================
-function PinDots({ pin, maxLen = 6 }: { pin: string; maxLen?: number }) {
-  return (
-    <div className="flex gap-3 justify-center my-10">
-      {Array.from({ length: maxLen }).map((_, i) => (
-        <motion.div
-          key={i}
-          animate={
-            pin.length > i 
-              ? { scale: [1, 1.3, 1], backgroundColor: "#00ff88" } 
-              : { scale: 1, backgroundColor: "rgba(0, 255, 136, 0.15)" }
-          }
-          transition={{ duration: 0.3, type: "spring" }}
-          className="w-6 h-6 rounded-full border-2 border-green-400 shadow-lg shadow-green-500/50 backdrop-blur-sm"
-        />
-      ))}
-    </div>
-  );
-}
-
-function NumericKeypad({ onPress, onDelete, disabled }: { onPress: (d: string) => void; onDelete: () => void; disabled?: boolean }) {
-  const keys = ["1","2","3","4","5","6","7","8","9","","0","⌫"];
-  
-  return (
-    <div className="grid grid-cols-3 gap-4 w-full max-w-sm mx-auto mt-10">
-      {keys.map((k, i) => {
-        if (k === "") return <div key={i} />;
-        const isDelete = k === "⌫";
-        return (
-          <motion.button
-            key={i}
-            whileTap={{ scale: 0.85, y: 2 }}
-            whileHover={{ scale: 1.08, y: -2 }}
-            disabled={disabled}
-            onClick={() => isDelete ? onDelete() : onPress(k)}
-            className={`h-20 rounded-2xl font-mono text-2xl font-bold transition-all border-2 backdrop-blur-md shadow-lg
-              ${isDelete
-                ? "border-red-500/60 text-red-300 bg-gradient-to-br from-red-500/20 to-red-600/10 hover:from-red-500/30 hover:to-red-600/20 active:from-red-500/40 active:to-red-600/30 shadow-red-500/30"
-                : "border-green-400/70 text-white bg-gradient-to-br from-green-500/20 to-green-600/10 hover:from-green-500/30 hover:to-green-600/20 active:from-green-500/40 active:to-green-600/30 shadow-green-500/40"
-              }
-              disabled:opacity-30 disabled:cursor-not-allowed transform transition-all`}
-          >
-            {isDelete ? <Delete className="w-7 h-7 mx-auto" /> : k}
-          </motion.button>
-        );
-      })}
-    </div>
-  );
-}
-
-// ============================================================
 // MAIN COMPONENT
 // ============================================================
-type FlowState =
-  | "loading"
-  | "new_device_create_pin"
-  | "new_device_confirm_pin"
-  | "pin_mismatch"
-  | "pin_entry"
-  | "verifying"
-  | "success";
-
 export default function Aplicativo() {
-  const [, navigate] = useLocation();
-  const [deviceId] = useState<string>(getOrCreateDeviceId);
-  const [flowState, setFlowState] = useState<FlowState>("loading");
+  const [, setLocation] = useLocation();
+  const [mode, setMode] = useState<"entry" | "create" | "confirm">("entry");
   const [pin, setPin] = useState("");
-  const [firstPin, setFirstPin] = useState("");
-  const [error, setError] = useState("");
-  const [pinError, setPinError] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showPin, setShowPin] = useState(false);
+  const [deviceId] = useState(() => getOrCreateDeviceId());
 
-  // Check session or device on mount
+  // Check if user has PIN on mount
   useEffect(() => {
-    const session = sessionStorage.getItem(SESSION_KEY);
-    if (session) {
-      try {
-        const parsed = JSON.parse(session);
-        if (parsed.deviceId && parsed.expires > Date.now()) {
-          navigate("/app");
-          return;
-        }
-      } catch { /* ignore */ }
-      sessionStorage.removeItem(SESSION_KEY);
-    }
-    // Check if device has PIN
-    const hasPin = !!localStorage.getItem(PIN_KEY);
-    setFlowState(hasPin ? "pin_entry" : "new_device_create_pin");
-  }, [navigate]);
-
-  const handlePinPress = useCallback((digit: string) => {
-    if (pin.length >= 6) return;
-    setPin(prev => prev + digit);
-    setError("");
-    setPinError("");
-  }, [pin]);
-
-  const handlePinDelete = useCallback(() => {
-    setPin(prev => prev.slice(0, -1));
-    setError("");
-    setPinError("");
-  }, []);
-
-  // Auto-submit when 6 digits entered
-  useEffect(() => {
-    if (pin.length !== 6) return;
-
-    if (flowState === "new_device_create_pin") {
-      const validation = validatePinSecurity(pin);
-      if (!validation.valid) {
-        setPinError(validation.reason || "PIN inválido.");
-        setTimeout(() => { setPin(""); setPinError(""); }, 2000);
-        return;
-      }
-      setFirstPin(pin);
-      setPin("");
-      setFlowState("new_device_confirm_pin");
+    const storedPin = localStorage.getItem(PIN_KEY);
+    const session = localStorage.getItem(SESSION_KEY);
+    
+    if (session && new Date(session) > new Date()) {
+      setLocation("/app");
       return;
     }
 
-    if (flowState === "new_device_confirm_pin") {
-      if (pin !== firstPin) {
-        setFlowState("pin_mismatch");
-        setPin("");
-        setFirstPin("");
-        setTimeout(() => setFlowState("new_device_create_pin"), 2500);
-        return;
-      }
-      setFlowState("verifying");
-      localStorage.setItem(PIN_KEY, pin);
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ deviceId, expires: Date.now() + 8 * 60 * 60 * 1000 }));
-      setTimeout(() => {
-        setFlowState("success");
-        setTimeout(() => navigate("/app"), 1500);
-      }, 1000);
-      return;
+    if (storedPin) {
+      setMode("entry");
+    } else {
+      setMode("create");
     }
+  }, [setLocation]);
 
-    if (flowState === "pin_entry") {
-      setFlowState("verifying");
+  // Handle PIN entry
+  const handlePinEntry = useCallback((digit: string) => {
+    if (mode === "entry" || mode === "create") {
+      if (pin.length < 6) {
+        setPin(prev => prev + digit);
+        setError(null);
+      }
+    } else if (mode === "confirm") {
+      if (confirmPin.length < 6) {
+        setConfirmPin(prev => prev + digit);
+        setError(null);
+      }
+    }
+  }, [pin, confirmPin, mode]);
+
+  // Handle backspace
+  const handleBackspace = useCallback(() => {
+    if (mode === "entry" || mode === "create") {
+      setPin(prev => prev.slice(0, -1));
+    } else if (mode === "confirm") {
+      setConfirmPin(prev => prev.slice(0, -1));
+    }
+  }, [mode]);
+
+  // Handle PIN submission
+  const handleSubmit = useCallback(async () => {
+    if (mode === "entry") {
       const storedPin = localStorage.getItem(PIN_KEY);
       if (pin === storedPin) {
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ deviceId, expires: Date.now() + 8 * 60 * 60 * 1000 }));
-        setTimeout(() => {
-          setFlowState("success");
-          setTimeout(() => navigate("/app"), 1500);
-        }, 1000);
+        setLoading(true);
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 8);
+        localStorage.setItem(SESSION_KEY, expiresAt.toISOString());
+        setLocation("/app");
       } else {
         setError("PIN incorreto. Tente novamente.");
         setPin("");
-        setTimeout(() => {
-          setFlowState("pin_entry");
-          setError("");
-        }, 1800);
       }
-      return;
+    } else if (mode === "create") {
+      const validation = validatePinSecurity(pin);
+      if (!validation.valid) {
+        setError(validation.reason || "PIN inválido");
+        setPin("");
+      } else {
+        setMode("confirm");
+        setError(null);
+      }
+    } else if (mode === "confirm") {
+      if (pin === confirmPin) {
+        localStorage.setItem(PIN_KEY, pin);
+        setLoading(true);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 8);
+        localStorage.setItem(SESSION_KEY, expiresAt.toISOString());
+        setLocation("/app");
+      } else {
+        setError("PINs não correspondem. Tente novamente.");
+        setPin("");
+        setConfirmPin("");
+        setMode("create");
+      }
     }
-  }, [pin, flowState, deviceId, navigate]);
+  }, [mode, pin, confirmPin, setLocation]);
 
-  // ---- RENDER ----
+  // Keyboard support
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (/^\d$/.test(e.key)) {
+        handlePinEntry(e.key);
+      } else if (e.key === "Backspace") {
+        handleBackspace();
+      } else if (e.key === "Enter" && ((mode === "entry" && pin.length === 6) || (mode === "create" && pin.length === 6) || (mode === "confirm" && confirmPin.length === 6))) {
+        handleSubmit();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handlePinEntry, handleBackspace, handleSubmit, mode, pin, confirmPin]);
+
+  const currentPin = mode === "confirm" ? confirmPin : pin;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black flex flex-col items-center justify-center relative overflow-hidden px-4 py-8">
-      {/* Animated background with multiple layers */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Grid background */}
-        <div className="absolute inset-0" style={{
-          backgroundImage: "linear-gradient(rgba(0, 255, 136, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 136, 0.04) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }} />
-        
-        {/* Animated orbs */}
-        <motion.div
-          animate={{ x: [0, 40, 0], y: [0, -40, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-20 left-20 w-96 h-96 bg-green-500/15 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, -40, 0], y: [0, 40, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-20 right-20 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 w-72 h-72 bg-amber-500/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"
-        />
-      </div>
-
-      {/* Main content */}
+    <div className="min-h-screen w-full overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative">
+      {/* Animated background orbs */}
       <motion.div
-        initial={{ opacity: 0, y: 60 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-        className="relative z-10 w-full max-w-md"
-      >
-        {/* Header with animated logo */}
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 0.8, type: "spring", stiffness: 150 }}
-            className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-green-400 via-green-500 to-cyan-500 mb-8 shadow-2xl shadow-green-500/60 relative"
-          >
-            <motion.span 
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-6xl"
+        className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 rounded-full blur-3xl"
+        animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
+        transition={{ duration: 15, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 rounded-full blur-3xl"
+        animate={{ x: [0, -50, 0], y: [0, -30, 0] }}
+        transition={{ duration: 18, repeat: Infinity }}
+      />
+
+      {/* Grid background */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,136,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,136,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full max-w-md"
+        >
+          {/* Header */}
+          <div className="text-center mb-12">
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="text-6xl mb-4"
             >
               🐄
-            </motion.span>
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 rounded-3xl border-2 border-transparent bg-gradient-to-r from-green-400/50 to-cyan-500/50 via-transparent"
-            />
-          </motion.div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-5xl font-black bg-gradient-to-r from-green-400 via-green-300 to-cyan-400 bg-clip-text text-transparent mb-3 tracking-tight"
-          >
-            BOVISION
-          </motion.h1>
-          
-          <motion.p 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-gray-400 text-sm font-light tracking-[0.2em] uppercase"
-          >
-            Acesso Seguro
-          </motion.p>
-        </div>
-
-        {/* Main card */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.6 }}
-          className="rounded-3xl border border-green-500/40 bg-gradient-to-b from-slate-900/80 to-slate-950/80 backdrop-blur-2xl p-10 shadow-2xl shadow-green-500/30 relative overflow-hidden"
-        >
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-cyan-500/5 pointer-events-none" />
-          
-          <div className="relative z-10">
-            <AnimatePresence mode="wait">
-
-              {/* LOADING */}
-              {flowState === "loading" && (
-                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-16">
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
-                    <Loader2 className="w-12 h-12 mx-auto text-green-400" />
-                  </motion.div>
-                  <p className="font-mono text-xs text-gray-400 mt-6 tracking-[0.15em] uppercase">Identificando Dispositivo...</p>
-                </motion.div>
-              )}
-
-              {/* CREATE PIN */}
-              {flowState === "new_device_create_pin" && (
-                <motion.div key="create" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.5 }}>
-                  <div className="text-center mb-6">
-                    <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2.5, repeat: Infinity }}>
-                      <Lock className="w-12 h-12 mx-auto text-green-400 mb-6" />
-                    </motion.div>
-                    <h2 className="text-3xl font-bold text-white mb-3">Criar PIN</h2>
-                    <p className="text-gray-400 text-sm leading-relaxed">Escolha um PIN de 6 dígitos seguro para proteger sua conta</p>
-                  </div>
-
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 border border-green-500/25 rounded-2xl p-5 mb-8 backdrop-blur-sm"
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <Smartphone className="w-5 h-5 text-green-400" />
-                      <p className="font-mono text-xs text-gray-300">{deviceId}</p>
-                    </div>
-                    <p className="text-xs text-gray-500 font-light">ID do dispositivo único</p>
-                  </motion.div>
-
-                  <PinDots pin={pin} />
-
-                  {pinError && (
-                    <motion.div initial={{ opacity: 0, y: -15, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="flex items-start gap-3 bg-red-500/15 border border-red-500/40 rounded-2xl p-5 mb-8 backdrop-blur-sm">
-                      <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                      <p className="text-red-300 text-sm font-light leading-relaxed">{pinError}</p>
-                    </motion.div>
-                  )}
-
-                  <NumericKeypad onPress={handlePinPress} onDelete={handlePinDelete} />
-
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="mt-10 rounded-2xl bg-gradient-to-br from-green-500/10 to-cyan-500/5 border border-green-500/25 p-5 backdrop-blur-sm"
-                  >
-                    <p className="text-xs text-gray-300 text-center leading-relaxed font-light">
-                      🔒 <span className="text-green-400 font-semibold">Segurança Bancária:</span> Evite sequências, repetições e padrões simples
-                    </p>
-                  </motion.div>
-                </motion.div>
-              )}
-
-              {/* CONFIRM PIN */}
-              {flowState === "new_device_confirm_pin" && (
-                <motion.div key="confirm" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.5 }}>
-                  <div className="text-center mb-6">
-                    <ShieldCheck className="w-12 h-12 mx-auto text-cyan-400 mb-6" />
-                    <h2 className="text-3xl font-bold text-white mb-3">Confirmar PIN</h2>
-                    <p className="text-gray-400 text-sm">Digite o PIN novamente para confirmar</p>
-                  </div>
-
-                  <PinDots pin={pin} />
-                  <NumericKeypad onPress={handlePinPress} onDelete={handlePinDelete} />
-                </motion.div>
-              )}
-
-              {/* PIN MISMATCH */}
-              {flowState === "pin_mismatch" && (
-                <motion.div key="mismatch" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="text-center py-16">
-                  <motion.div animate={{ rotate: [0, -20, 20, -20, 20, 0], scale: [1, 1.15, 1] }} transition={{ duration: 0.7 }}>
-                    <AlertTriangle className="w-16 h-16 mx-auto text-red-400 mb-6" />
-                  </motion.div>
-                  <h2 className="text-2xl font-bold text-white mb-3">PINs não coincidem</h2>
-                  <p className="text-gray-400 text-sm mb-8">Vamos recomeçar o cadastro do PIN.</p>
-                  <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                    <motion.div initial={{ width: "100%" }} animate={{ width: "0%" }} transition={{ duration: 2.5, ease: "linear" }} className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-600" />
-                  </div>
-                </motion.div>
-              )}
-
-              {/* PIN ENTRY (existing device) */}
-              {flowState === "pin_entry" && (
-                <motion.div key="entry" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.5 }}>
-                  <div className="text-center mb-6">
-                    <Lock className="w-12 h-12 mx-auto text-green-400 mb-6" />
-                    <h2 className="text-3xl font-bold text-white mb-3">Acesso Seguro</h2>
-                    <p className="text-gray-400 text-sm">Digite seu PIN de 6 dígitos</p>
-                  </div>
-
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 border border-green-500/25 rounded-2xl p-5 mb-8 backdrop-blur-sm"
-                  >
-                    <p className="font-mono text-xs text-gray-300 text-center">{deviceId}</p>
-                  </motion.div>
-
-                  <PinDots pin={pin} />
-
-                  {error && (
-                    <motion.div initial={{ opacity: 0, y: -15, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="flex items-center gap-3 bg-red-500/15 border border-red-500/40 rounded-2xl p-5 mb-8 backdrop-blur-sm">
-                      <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
-                      <p className="text-red-300 text-sm font-light">{error}</p>
-                    </motion.div>
-                  )}
-
-                  <NumericKeypad onPress={handlePinPress} onDelete={handlePinDelete} />
-
-                  <p className="text-center text-xs text-gray-500 mt-10 font-mono tracking-wide">
-                    ⚠️ NÃO COMPARTILHE SEU PIN COM NINGUÉM
-                  </p>
-                </motion.div>
-              )}
-
-              {/* VERIFYING */}
-              {flowState === "verifying" && (
-                <motion.div key="verifying" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-16">
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
-                    <Loader2 className="w-12 h-12 mx-auto text-cyan-400" />
-                  </motion.div>
-                  <p className="font-mono text-xs text-gray-400 mt-6 tracking-[0.15em] uppercase">Verificando PIN...</p>
-                </motion.div>
-              )}
-
-              {/* SUCCESS */}
-              {flowState === "success" && (
-                <motion.div key="success" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16">
-                  <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 200, damping: 15 }} className="mb-6">
-                    <ShieldCheck className="w-16 h-16 mx-auto text-green-400" />
-                  </motion.div>
-                  <h2 className="text-2xl font-bold text-white mb-3">Acesso Autorizado</h2>
-                  <p className="text-gray-400 text-sm mb-8">Redirecionando para o dashboard...</p>
-                  <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.5, ease: "easeInOut" }} className="h-1.5 bg-gradient-to-r from-green-500 via-cyan-500 to-green-400 rounded-full" />
-                </motion.div>
-              )}
-
-            </AnimatePresence>
+            </motion.div>
+            <h1 className="text-4xl font-black bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent mb-2">
+              BOVISION
+            </h1>
+            <p className="text-cyan-400/80 text-sm tracking-widest">VISÃO INTELIGENTE PARA A NOVA PECUÁRIA</p>
           </div>
-        </motion.div>
 
-        {/* Footer */}
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          className="text-center text-xs text-gray-600 mt-10 font-light tracking-wide"
-        >
-          Versão 1.0 • Segurança Bancária • 2026
-        </motion.p>
-      </motion.div>
+          {/* Main card */}
+          <motion.div
+            className="backdrop-blur-xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 border border-emerald-500/20 rounded-2xl p-8 shadow-2xl"
+            animate={{ boxShadow: ["0 0 20px rgba(0,255,136,0.1)", "0 0 40px rgba(0,255,136,0.2)", "0 0 20px rgba(0,255,136,0.1)"] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
+            {/* Status badge */}
+            <div className="flex items-center justify-center gap-2 mb-8 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full w-fit mx-auto">
+              <Shield className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-semibold text-emerald-400">ACESSO SEGURO</span>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-center text-xl font-bold text-white mb-2">
+              {mode === "entry" ? "Bem-vindo de Volta" : mode === "create" ? "Criar PIN de Segurança" : "Confirmar PIN"}
+            </h2>
+            <p className="text-center text-sm text-slate-400 mb-8">
+              {mode === "entry" 
+                ? "Digite seu PIN para acessar" 
+                : mode === "create" 
+                ? "Crie um PIN seguro com 6 dígitos" 
+                : "Confirme seu PIN"}
+            </p>
+
+            {/* PIN dots */}
+            <div className="flex gap-3 justify-center mb-10">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{
+                    scale: currentPin.length > i ? [1, 1.2, 1] : 1,
+                    backgroundColor: currentPin.length > i ? "#00ff88" : "rgba(0, 255, 136, 0.1)",
+                    boxShadow: currentPin.length > i ? "0 0 20px rgba(0,255,136,0.6)" : "none",
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="w-12 h-12 rounded-full border-2 border-emerald-500/40"
+                />
+              ))}
+            </div>
+
+            {/* Error message */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex gap-2 items-start"
+              >
+                <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-red-400">{error}</p>
+              </motion.div>
+            )}
+
+            {/* Numeric keypad */}
+            <div className="grid grid-cols-3 gap-3 mb-8">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                <motion.button
+                  key={num}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handlePinEntry(num.toString())}
+                  disabled={currentPin.length >= 6}
+                  className="h-14 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/40 text-white font-bold text-lg hover:from-emerald-500/30 hover:to-cyan-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {num}
+                </motion.button>
+              ))}
+            </div>
+
+            {/* 0 and action buttons */}
+            <div className="grid grid-cols-3 gap-3 mb-8">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handlePinEntry("0")}
+                disabled={currentPin.length >= 6}
+                className="h-14 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/40 text-white font-bold text-lg hover:from-emerald-500/30 hover:to-cyan-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed col-span-1"
+              >
+                0
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowPin(!showPin)}
+                className="h-14 rounded-lg bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-slate-600/40 text-slate-300 hover:from-slate-700/60 hover:to-slate-800/60 transition-all flex items-center justify-center"
+              >
+                {showPin ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleBackspace}
+                className="h-14 rounded-lg bg-gradient-to-br from-red-500/20 to-red-600/20 border border-red-500/40 text-red-400 hover:from-red-500/30 hover:to-red-600/30 transition-all flex items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </motion.button>
+            </div>
+
+            {/* Submit button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSubmit}
+              disabled={currentPin.length !== 6 || loading}
+              className="w-full h-14 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold text-lg hover:from-emerald-600 hover:to-cyan-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+            >
+              {loading ? (
+                <>
+                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }}>
+                    <Smartphone className="w-5 h-5" />
+                  </motion.div>
+                  Processando...
+                </>
+              ) : (
+                <>
+                  <Check className="w-5 h-5" />
+                  {mode === "entry" ? "Entrar" : mode === "create" ? "Próximo" : "Confirmar"}
+                </>
+              )}
+            </motion.button>
+
+            {/* Device info */}
+            <div className="mt-8 pt-6 border-t border-slate-700/50 text-center">
+              <p className="text-xs text-slate-500 mb-2">Device ID</p>
+              <p className="text-xs font-mono text-emerald-400/60">{deviceId}</p>
+            </div>
+          </motion.div>
+
+          {/* Footer */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="text-center mt-8 text-xs text-slate-500"
+          >
+            <p>Plataforma AgroTech com IA avançada</p>
+            <p className="mt-1">© 2026 BOVISION AI. Todos os direitos reservados.</p>
+          </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
