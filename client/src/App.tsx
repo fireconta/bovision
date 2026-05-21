@@ -5,7 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Landing from "./pages/Landing";
-import PinLogin from "./pages/PinLogin";
+import Aplicativo from "./pages/Aplicativo";
 import Dashboard from "./pages/Dashboard";
 import HerdManagement from "./pages/HerdManagement";
 import AiAssistant from "./pages/AiAssistant";
@@ -34,7 +34,7 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Landing} />
-      <Route path={"/aplicativo"} component={PinLogin} />
+      <Route path={"/aplicativo"} component={Aplicativo} />
       <Route path={"/app"} component={() => <App><AppHome /></App>} />
       <Route path={"/app/rebanho"} component={() => <App><HerdManagement /></App>} />
       <Route path={"/app/assistente"} component={() => <App><AiAssistant /></App>} />
