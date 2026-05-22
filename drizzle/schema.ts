@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean, longtext, json, date } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean, longtext, json, date, uniqueIndex } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -24,14 +24,16 @@ export type InsertUser = typeof users.$inferInsert;
 export const devices = mysqlTable("devices", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  deviceId: varchar("deviceId", { length: 32 }).notNull().unique(), // BV-XXXXXXXX format
+  deviceId: varchar("deviceId", { length: 32 }).notNull(), // BV-XXXXXXXX format
   userAgent: text("userAgent"),
   ipAddress: varchar("ipAddress", { length: 45 }),
   operatingSystem: varchar("operatingSystem", { length: 64 }),
   browser: varchar("browser", { length: 64 }),
   lastAccessed: timestamp("lastAccessed").defaultNow(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => ({
+  userDeviceUnique: uniqueIndex("user_device_unique").on(table.userId, table.deviceId),
+}));
 
 export type Device = typeof devices.$inferSelect;
 export type InsertDevice = typeof devices.$inferInsert;

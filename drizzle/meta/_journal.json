@@ -22,6 +22,13 @@
       "when": 1779384460314,
       "tag": "0002_famous_snowbird",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1779470574185,
+      "tag": "0003_broken_next_avengers",
+      "breakpoints": true
     }
   ]
 }
