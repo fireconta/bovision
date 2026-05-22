@@ -1694,7 +1694,8 @@ var pinAuthRouter = router({
       return {
         success: true,
         deviceId,
-        message: "PIN criado com sucesso! Voc\xEA tem 30 dias de trial."
+        message: "PIN criado com sucesso! Voc\xEA tem 30 dias de trial.",
+        sessionToken: crypto.randomBytes(32).toString("hex")
       };
     } catch (error) {
       if (error.message?.includes("Duplicate entry")) {

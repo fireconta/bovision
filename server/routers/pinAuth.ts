@@ -130,6 +130,7 @@ export const pinAuthRouter = router({
           success: true,
           deviceId,
           message: "PIN criado com sucesso! Você tem 30 dias de trial.",
+          sessionToken: crypto.randomBytes(32).toString("hex"),
         };
       } catch (error: any) {
         if (error.message?.includes("Duplicate entry")) {
