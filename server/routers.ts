@@ -5,15 +5,16 @@ import { publicProcedure, router } from "./_core/trpc";
 import { aiAssistantRouter } from "./routers/aiAssistant";
 import { paymentsRouter } from "./routers/payments";
 import { authRouter } from "./routers/auth";
+import { pinAuthRouter } from "./routers/pinAuth";
 import { conversationsRouter } from "./routers/conversations";
 import { herdRouter } from "./routers/herd";
 import { financialRouter } from "./routers/financial";
 import { exportRouter } from "./routers/export";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
-  system: systemRouter,
   auth: authRouter,
+  pinAuth: pinAuthRouter,
+  system: systemRouter,
   aiAssistant: aiAssistantRouter,
   payments: paymentsRouter,
   conversations: conversationsRouter,
