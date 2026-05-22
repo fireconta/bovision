@@ -263,14 +263,14 @@ export default function App({ children }: { children?: React.ReactNode }) {
 
   // Check session on mount
   useEffect(() => {
-    const session = sessionStorage.getItem("bv_session");
+    const session = localStorage.getItem("bv_session");
     if (!session) {
       navigate("/aplicativo");
     }
   }, [navigate]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("bv_session");
+    localStorage.removeItem("bv_session");
     navigate("/aplicativo");
   };
 

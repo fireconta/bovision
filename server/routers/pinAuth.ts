@@ -126,9 +126,13 @@ export const pinAuthRouter = router({
           isActive: true,
         });
 
+        // Generate session token for automatic login
+        const sessionToken = crypto.randomBytes(32).toString("hex");
+
         return {
           success: true,
           deviceId,
+          sessionToken,
           message: "PIN criado com sucesso! Você tem 30 dias de trial.",
         };
       } catch (error: any) {
