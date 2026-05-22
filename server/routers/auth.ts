@@ -3,6 +3,11 @@ import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
+import { COOKIE_NAME } from "../../shared/const";
+import { getSessionCookieOptions } from "../_core/cookies";
+import type { TrpcContext } from "../_core/context";
+
+
 
 // ============================================================
 // HELPERS
@@ -42,8 +47,10 @@ export const authRouter = router({
   me: publicProcedure.query(opts => opts.ctx.user),
 
   // Logout
-  logout: publicProcedure.mutation(({ ctx }) => {
-    // Clear session
+  logout: publicProcedure.mutation(({ ctx }: { ctx: TrpcContext }) => {
+    // Clear session cookie
+    const cookieOptions = getSessionCookieOptions(ctx.req);
+    ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
     return { success: true };
   }),
 

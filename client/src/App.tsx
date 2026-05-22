@@ -16,7 +16,7 @@ import VaccinationCalendar from "./pages/VaccinationCalendar";
 import FinancialControl from "./pages/FinancialControl";
 import Analytics from "./pages/Analytics";
 import Health from "./pages/Health";
-import AIInsights from "./pages/AIInsights";
+import AiInsights from "./pages/AiInsights";
 import Pasture from "./pages/Pasture";
 import Nutrition from "./pages/Nutrition";
 import Alerts from "./pages/Alerts";
@@ -44,7 +44,7 @@ function Router() {
       <Route path={"/app/financeiro"} component={() => <App><FinancialControl /></App>} />
       <Route path={"/app/analytics"} component={() => <App><Analytics /></App>} />
       <Route path={"/app/health"} component={() => <App><Health /></App>} />
-      <Route path={"/app/ai-insights"} component={() => <App><AIInsights /></App>} />
+      <Route path={"/app/ai-insights"} component={() => <App><AiInsights /></App>} />
       <Route path={"/app/pasture"} component={() => <App><Pasture /></App>} />
       <Route path={"/app/nutrition"} component={() => <App><Nutrition /></App>} />
       <Route path={"/app/alerts"} component={() => <App><Alerts /></App>} />

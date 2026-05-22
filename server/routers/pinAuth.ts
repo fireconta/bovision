@@ -1,8 +1,8 @@
-import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getDb } from "../db";
-import { pins, devices, licenses, sessions, adminLogs } from "../../drizzle/schema";
+import { pins, devices, licenses } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
 
@@ -57,25 +57,20 @@ function hashPin(pin: string): string {
   return crypto.createHash("sha256").update(pin).digest("hex");
 }
 
-function verifyPin(pin: string, hash: string): boolean {
-  return hashPin(pin) === hash;
-}
-
-// ============================================================
-// DEVICE ID GENERATION
-// ============================================================
 function generateDeviceId(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let id = "BV-";
-  for (let i = 0; i < 8; i++) id += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 8; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
   return id;
 }
 
 // ============================================================
-// ROUTER
+// PIN AUTH ROUTER
 // ============================================================
 export const pinAuthRouter = router({
-  // Create new PIN (first time setup)
+  // Create PIN for new device
   createPin: publicProcedure
     .input(z.object({
       pin: z.string().length(6),
@@ -83,65 +78,65 @@ export const pinAuthRouter = router({
       deviceId: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível" });
-
-      // Validate PIN security
+      // Validate PIN strength
       const validation = validatePinSecurity(input.pin);
       if (!validation.valid) {
         throw new TRPCError({ code: "BAD_REQUEST", message: validation.reason });
       }
 
-      // Verify PINs match
+      // Confirm PIN matches
       if (input.pin !== input.confirmPin) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Os PINs não correspondem." });
       }
 
-      // Create or get device
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível" });
+
+      // Generate device ID
       let deviceId = input.deviceId || generateDeviceId();
-      const existingDevice = await (db.query as any).devices.findFirst({
-        where: eq(devices.deviceId, deviceId),
-      });
 
-      if (existingDevice) {
-        throw new TRPCError({ code: "CONFLICT", message: "Dispositivo já registrado." });
+      try {
+        // Create device
+        await (db as any).insert(devices).values({
+          userId: 0,
+          deviceId,
+          userAgent: "web",
+          ipAddress: "0.0.0.0",
+        });
+
+        // Create PIN record
+        const pinHash = hashPin(input.pin);
+        await (db as any).insert(pins).values({
+          userId: 0,
+          deviceId,
+          pinHash,
+          attempts: 0,
+        });
+
+        // Create trial license
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30);
+
+        await (db as any).insert(licenses).values({
+          userId: 0,
+          plan: "trial",
+          expirationDate,
+          status: "active",
+          isTrial: true,
+          isActive: true,
+        });
+
+        return {
+          success: true,
+          deviceId,
+          message: "PIN criado com sucesso! Você tem 30 dias de trial.",
+        };
+      } catch (error: any) {
+        if (error.message?.includes("Duplicate entry")) {
+          throw new TRPCError({ code: "CONFLICT", message: "Dispositivo já registrado." });
+        }
+        throw error;
       }
-
-      // Create device
-      await db.insert(devices).values({
-        userId: 0,
-        deviceId,
-        userAgent: "web",
-        ipAddress: "0.0.0.0",
-      });
-
-      // Create PIN record
-      const pinHash = hashPin(input.pin);
-      await db.insert(pins).values({
-        userId: 0,
-        deviceId,
-        pinHash,
-        attempts: 0,
-      });
-
-      // Create trial license
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + 30);
-
-      await db.insert(licenses).values({
-        userId: 0,
-        plan: "trial",
-        expirationDate,
-        status: "active",
-        isTrial: true,
-        isActive: true,
-      });
-
-      return {
-        success: true,
-        deviceId,
-        message: "PIN criado com sucesso! Você tem 30 dias de trial.",
-      };
     }),
 
   // Verify PIN and create session
@@ -154,141 +149,114 @@ export const pinAuthRouter = router({
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível" });
 
-      // Find device
-      const device = await (db.query as any).devices.findFirst({
-        where: eq(devices.deviceId, input.deviceId),
-      });
-
-      if (!device) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Dispositivo não encontrado." });
-      }
-
-      // Find PIN record
-      const pinRecord = await (db.query as any).pins.findFirst({
-        where: eq(pins.deviceId, input.deviceId),
-      });
-
-      if (!pinRecord) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "PIN não configurado." });
-      }
-
-      // Check if locked
-      if (pinRecord.lockedUntil && new Date() < pinRecord.lockedUntil) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Dispositivo bloqueado por múltiplas tentativas. Tente novamente mais tarde.",
+      try {
+        // Find device
+        const device = await (db as any).query.devices.findFirst({
+          where: eq(devices.deviceId, input.deviceId),
         });
-      }
 
-      // Verify PIN
-      if (!verifyPin(input.pin, pinRecord.pinHash)) {
-        const newAttempts = (pinRecord.attempts || 0) + 1;
-        let lockedUntil = null;
-
-        if (newAttempts >= 5) {
-          lockedUntil = new Date(Date.now() + 15 * 60 * 1000);
+        if (!device) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Dispositivo não encontrado." });
         }
 
-        await db.update(pins).set({
-          attempts: newAttempts,
-          lockedUntil,
+        // Find PIN record
+        const pinRecord = await (db as any).query.pins.findFirst({
+          where: eq(pins.deviceId, input.deviceId),
+        });
+
+        if (!pinRecord) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "PIN não configurado para este dispositivo." });
+        }
+
+        // Check if locked
+        if (pinRecord.lockedUntil && new Date(pinRecord.lockedUntil) > new Date()) {
+          throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Dispositivo bloqueado. Tente novamente mais tarde." });
+        }
+
+        // Verify PIN
+        const pinHash = hashPin(input.pin);
+        if (pinHash !== pinRecord.pinHash) {
+          // Increment attempts
+          const newAttempts = (pinRecord.attempts || 0) + 1;
+          const isLocked = newAttempts >= 5;
+
+          await (db as any).update(pins).set({
+            attempts: newAttempts,
+            lockedUntil: isLocked ? new Date(Date.now() + 15 * 60 * 1000) : null,
+          }).where(eq(pins.deviceId, input.deviceId));
+
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: isLocked ? "Muitas tentativas. Dispositivo bloqueado por 15 minutos." : `PIN incorreto. Tentativas restantes: ${5 - newAttempts}`,
+          });
+        }
+
+        // Reset attempts on success
+        await (db as any).update(pins).set({
+          attempts: 0,
+          lockedUntil: null,
         }).where(eq(pins.deviceId, input.deviceId));
 
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: `PIN incorreto. Tentativas restantes: ${5 - newAttempts}`,
+        // Check license status
+        const license = await (db as any).query.licenses.findFirst({
+          where: eq(licenses.userId, device.userId),
         });
+
+        if (!license || license.status !== "active") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Licença inativa ou expirada." });
+        }
+
+        return {
+          success: true,
+          deviceId: input.deviceId,
+          message: "PIN verificado com sucesso!",
+          sessionToken: crypto.randomBytes(32).toString("hex"),
+        };
+      } catch (error: any) {
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao verificar PIN" });
       }
-
-      // Reset attempts on success
-      await db.update(pins).set({
-        attempts: 0,
-        lockedUntil: null,
-      }).where(eq(pins.deviceId, input.deviceId));
-
-      // Check license status
-      const license = await (db.query as any).licenses.findFirst({
-        where: eq(licenses.userId, device.userId),
-      });
-
-      if (!license || license.status !== "active") {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Sua licença expirou. Renove para continuar.",
-        });
-      }
-
-      if (license.expirationDate < new Date() && !license.isTrial) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Sua assinatura expirou. Renove para continuar.",
-        });
-      }
-
-      // Create session
-      const sessionToken = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
-
-      await db.insert(sessions).values({
-        userId: device.userId,
-        deviceId: input.deviceId,
-        sessionToken,
-        expiresAt,
-        ipAddress: "0.0.0.0",
-      });
-
-      // Update device last accessed
-      await db.update(devices).set({
-        lastAccessed: new Date(),
-      }).where(eq(devices.deviceId, input.deviceId));
-
-      return {
-        success: true,
-        sessionToken,
-        expiresAt,
-        plan: license.plan,
-        isPremium: license.plan !== "trial",
-        message: "Login bem-sucedido!",
-      };
     }),
 
-  // Check device status
+  // Get device status
   getDeviceStatus: publicProcedure
     .input(z.object({ deviceId: z.string() }))
     .query(async ({ input }) => {
       const db = await getDb();
       if (!db) return { exists: false, status: "not_found" };
 
-      const device = await (db.query as any).devices.findFirst({
-        where: eq(devices.deviceId, input.deviceId),
-      });
+      try {
+        const device = await (db as any).query.devices.findFirst({
+          where: eq(devices.deviceId, input.deviceId),
+        });
 
-      if (!device) {
-        return { exists: false, status: "not_found" };
+        if (!device) {
+          return { exists: false, status: "not_found" };
+        }
+
+        const license = await (db as any).query.licenses.findFirst({
+          where: eq(licenses.userId, device.userId),
+        });
+
+        const pinRecord = await (db as any).query.pins.findFirst({
+          where: eq(pins.deviceId, input.deviceId),
+        });
+
+        return {
+          exists: true,
+          status: license?.status || "no_license",
+          isLocked: pinRecord?.lockedUntil ? new Date(pinRecord.lockedUntil) > new Date() : false,
+          plan: license?.plan || "none",
+        };
+      } catch {
+        return { exists: false, status: "error" };
       }
-
-      const license = await (db.query as any).licenses.findFirst({
-        where: eq(licenses.userId, device.userId),
-      });
-
-      const pinRecord = await (db.query as any).pins.findFirst({
-        where: eq(pins.deviceId, input.deviceId),
-      });
-
-      return {
-        exists: true,
-        status: license?.status || "no_license",
-        plan: license?.plan,
-        isPremium: license?.plan !== "trial",
-        isLocked: pinRecord?.lockedUntil ? new Date() < pinRecord.lockedUntil : false,
-        trialEndsAt: license?.expirationDate,
-      };
     }),
 
   // Admin: Block device
   blockDevice: protectedProcedure
-    .input(z.object({ deviceId: z.string(), reason: z.string() }))
-    .mutation(async ({ input, ctx }) => {
+    .input(z.object({ deviceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível" });
 
@@ -296,33 +264,30 @@ export const pinAuthRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admins podem bloquear dispositivos." });
       }
 
-      const device = await (db.query as any).devices.findFirst({
-        where: eq(devices.deviceId, input.deviceId),
-      });
+      try {
+        const device = await (db as any).query.devices.findFirst({
+          where: eq(devices.deviceId, input.deviceId),
+        });
 
-      if (!device) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Dispositivo não encontrado." });
+        if (!device) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Dispositivo não encontrado." });
+        }
+
+        await (db as any).update(licenses).set({
+          status: "cancelled",
+        }).where(eq(licenses.userId, device.userId));
+
+        return { success: true, message: "Dispositivo bloqueado com sucesso." };
+      } catch (error: any) {
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao bloquear dispositivo" });
       }
-
-      await db.update(licenses).set({
-        status: "cancelled",
-        isActive: false,
-      }).where(eq(licenses.userId, device.userId));
-
-      await db.insert(adminLogs).values({
-        adminId: ctx.user.id,
-        targetUserId: device.userId,
-        action: "block_device",
-        details: JSON.stringify({ deviceId: input.deviceId, reason: input.reason }),
-      });
-
-      return { success: true, message: "Dispositivo bloqueado com sucesso." };
     }),
 
   // Admin: Unblock device
   unblockDevice: protectedProcedure
     .input(z.object({ deviceId: z.string() }))
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Banco de dados indisponível" });
 
@@ -330,26 +295,23 @@ export const pinAuthRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Apenas admins podem desbloquear dispositivos." });
       }
 
-      const device = await (db.query as any).devices.findFirst({
-        where: eq(devices.deviceId, input.deviceId),
-      });
+      try {
+        const device = await (db as any).query.devices.findFirst({
+          where: eq(devices.deviceId, input.deviceId),
+        });
 
-      if (!device) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Dispositivo não encontrado." });
+        if (!device) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Dispositivo não encontrado." });
+        }
+
+        await (db as any).update(licenses).set({
+          status: "active",
+        }).where(eq(licenses.userId, device.userId));
+
+        return { success: true, message: "Dispositivo desbloqueado com sucesso." };
+      } catch (error: any) {
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao desbloquear dispositivo" });
       }
-
-      await db.update(licenses).set({
-        status: "active",
-        isActive: true,
-      }).where(eq(licenses.userId, device.userId));
-
-      await db.insert(adminLogs).values({
-        adminId: ctx.user.id,
-        targetUserId: device.userId,
-        action: "unblock_device",
-        details: JSON.stringify({ deviceId: input.deviceId }),
-      });
-
-      return { success: true, message: "Dispositivo desbloqueado com sucesso." };
     }),
 });
