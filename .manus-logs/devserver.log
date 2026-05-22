@@ -2040,3 +2040,13 @@
 [2026-05-22T17:32:02.520Z] 5:32:02 PM [vite] (client) hmr update /src/pages/App.tsx, /src/index.css
 [2026-05-22T17:32:13.197Z] [Auth] Missing session cookie
 [2026-05-22T17:32:27.161Z] 5:32:27 PM [vite] (client) hmr update /src/index.css
+[2026-05-22T17:33:12.520Z] [Auth] Missing session cookie
+[2026-05-22T17:47:55.138Z] 5:47:55 PM [vite] (client) hmr update /src/pages/Aplicativo.tsx, /src/index.css
+[2026-05-22T17:48:01.769Z] 5:48:01 PM [vite] (client) hmr update /src/pages/App.tsx, /src/index.css
+[2026-05-22T17:48:06.914Z] 5:48:06 PM [tsx] change in ./server/routers/pinAuth.ts Restarting...
+[2026-05-22T17:48:06.948Z] c
+[2026-05-22T17:48:07.679Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-05-22T17:48:07.785Z] Server running on http://localhost:3000/
+[2026-05-22T17:48:08.160Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-05-22T17:48:17.696Z] [Auth] Missing session cookie
+[2026-05-22T17:48:32.758Z] 5:48:32 PM [vite] (client) hmr update /src/index.css

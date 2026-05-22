@@ -550,3 +550,22 @@
 [2026-05-22T17:32:05.149Z] {"timestamp":1779471122752,"level":"DEBUG","args":["[vite]","hot updated: /src/index.css"],"stack":null}
 [2026-05-22T17:32:06.356Z] {"timestamp":1779471122932,"level":"DEBUG","args":["[Manus] Debug collector initialized (no rrweb, UI events only)"],"stack":null}
 [2026-05-22T17:32:06.356Z] {"timestamp":1779471123731,"level":"DEBUG","args":["[vite] connected."],"stack":null}
+[2026-05-22T17:32:29.095Z] {"timestamp":1779471148002,"level":"DEBUG","args":["[vite]","hot updated: /src/index.css"],"stack":null}
+[2026-05-22T17:32:29.731Z] {"timestamp":1779471147834,"level":"DEBUG","args":["[vite]","hot updated: /src/index.css"],"stack":null}
+[2026-05-22T17:32:33.793Z] {"timestamp":1779471151386,"level":"DEBUG","args":["[Manus] Debug collector initialized (no rrweb, UI events only)"],"stack":null}
+[2026-05-22T17:32:33.793Z] {"timestamp":1779471152157,"level":"DEBUG","args":["[vite] connected."],"stack":null}
+[2026-05-22T17:32:39.087Z] {"timestamp":1779471155942,"level":"DEBUG","args":["[Manus] Debug collector initialized (no rrweb, UI events only)"],"stack":null}
+[2026-05-22T17:32:39.087Z] {"timestamp":1779471156717,"level":"DEBUG","args":["[vite] connected."],"stack":null}
+[2026-05-22T17:47:56.847Z] {"timestamp":1779472075909,"level":"DEBUG","args":["[vite]","hot updated: /src/pages/Aplicativo.tsx"],"stack":null}
+[2026-05-22T17:47:56.847Z] {"timestamp":1779472075910,"level":"DEBUG","args":["[vite]","hot updated: /src/index.css"],"stack":null}
+[2026-05-22T17:47:58.656Z] {"timestamp":1779472076012,"level":"DEBUG","args":["[vite]","hot updated: /src/pages/Aplicativo.tsx"],"stack":null}
+[2026-05-22T17:47:58.656Z] {"timestamp":1779472076015,"level":"DEBUG","args":["[vite]","hot updated: /src/index.css"],"stack":null}
+[2026-05-22T17:48:02.873Z] {"timestamp":1779472082448,"level":"DEBUG","args":["[vite]","hot updated: /src/pages/App.tsx"],"stack":null}
+[2026-05-22T17:48:02.873Z] {"timestamp":1779472082449,"level":"DEBUG","args":["[vite]","hot updated: /src/index.css"],"stack":null}
+[2026-05-22T17:48:03.966Z] {"timestamp":1779472082617,"level":"DEBUG","args":["[vite]","hot updated: /src/pages/App.tsx"],"stack":null}
+[2026-05-22T17:48:03.966Z] {"timestamp":1779472082617,"level":"DEBUG","args":["[vite]","hot updated: /src/index.css"],"stack":null}
+[2026-05-22T17:48:08.026Z] {"timestamp":1779472086787,"level":"LOG","args":["[vite] server connection lost. Polling for restart..."],"stack":null}
+[2026-05-22T17:48:11.864Z] {"timestamp":1779472089031,"level":"DEBUG","args":["[Manus] Debug collector initialized (no rrweb, UI events only)"],"stack":null}
+[2026-05-22T17:48:11.864Z] {"timestamp":1779472090431,"level":"DEBUG","args":["[vite] connected."],"stack":null}
+[2026-05-22T17:48:12.585Z] {"timestamp":1779472089921,"level":"DEBUG","args":["[Manus] Debug collector initialized (no rrweb, UI events only)"],"stack":null}
+[2026-05-22T17:48:12.585Z] {"timestamp":1779472091564,"level":"DEBUG","args":["[vite] connected."],"stack":null}
